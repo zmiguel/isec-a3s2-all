@@ -7,4 +7,5 @@
 
 void main(void) {
 	printf("progTP\n");
+	printf("Funciona!!\n");
 }
