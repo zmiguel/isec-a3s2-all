@@ -19,8 +19,8 @@ void main(void) {
 	dispIntro();
 	printf("\n");
 
-	zAreas = readAreas(zAreas, &last_id);
-	last_id = getLastAeraID(zAreas);
+	zAreas = readAreas(zAreas);
+	last_id = getLastAreaID(zAreas);
 
 	printf("READY!\n");
 	dispArea(zAreas);
@@ -45,7 +45,7 @@ void main(void) {
 			}
 			if(tNR == 1){
 				while(valid1 != 1){
-					while(t1 >= nr_areas || t1 < 1){
+					while(t1 >= last_id || t1 < 1){
 						printf("ID fronteira 1: ");
 						scanf("%d", &t1);
 					}
@@ -55,12 +55,12 @@ void main(void) {
 						valid1=1;
 					}
 				}
-				zAreas = addAreaEnd(zAreas, nr_areas, tType, tCap, tNR, t1, -1, -1);
-				zAreas = addFronteira(zAreas, t1, nr_areas);
+				zAreas = addAreaEnd(zAreas, last_id, tType, tCap, tNR, t1, -1, -1);
+				zAreas = addFronteira(zAreas, t1, last_id);
 				valid1=0;
 			}else if(tNR == 2){
 				while (valid1 != 1) {
-					while(t1 >= nr_areas || t1 < 1){
+					while(t1 >= last_id || t1 < 1){
 						printf("ID fronteira 1: ");
 						scanf("%d", &t1);
 					}
@@ -71,7 +71,7 @@ void main(void) {
 					}
 				}
 				while (valid2 != 1) {
-					while(t2 >= nr_areas || t2 < 1 || t2 == t1){
+					while(t2 >= last_id || t2 < 1 || t2 == t1){
 						printf("ID fronteira 2: ");
 						scanf("%d", &t2);
 					}
@@ -81,14 +81,14 @@ void main(void) {
 						valid2=1;
 					}
 				}
-				zAreas = addAreaEnd(zAreas, nr_areas, tType, tCap, tNR, t1, t2, -1);
-				zAreas = addFronteira(zAreas, t1, nr_areas);
-				zAreas = addFronteira(zAreas, t2, nr_areas);
+				zAreas = addAreaEnd(zAreas, last_id, tType, tCap, tNR, t1, t2, -1);
+				zAreas = addFronteira(zAreas, t1, last_id);
+				zAreas = addFronteira(zAreas, t2, last_id);
 				valid1=0;
 				valid2=0;
 			}else if(tNR == 3){
 				while (valid1 != 1) {
-					while(t1 >= nr_areas || t1 < 1){
+					while(t1 >= last_id || t1 < 1){
 						printf("ID fronteira 1: ");
 						scanf("%d", &t1);
 					}
@@ -99,7 +99,7 @@ void main(void) {
 					}
 				}
 				while (valid2 != 1) {
-					while(t2 >= nr_areas || t2 < 1 || t2 == t1){
+					while(t2 >= last_id || t2 < 1 || t2 == t1){
 						printf("ID fronteira 2: ");
 						scanf("%d", &t2);
 					}
@@ -110,7 +110,7 @@ void main(void) {
 					}
 				}
 				while (valid3 != 1) {
-					while(t3 >= nr_areas || t3 < 1 || t3 == t1 && t3 == t2){
+					while(t3 >= last_id || t3 < 1 || t3 == t1 && t3 == t2){
 						printf("ID fronteira 2: ");
 						scanf("%d", &t3);
 					}
@@ -120,10 +120,10 @@ void main(void) {
 						valid3=1;
 					}
 				}
-				zAreas = addAreaEnd(zAreas, nr_areas, tType, tCap, tNR, t1, t2, t3);
-				zAreas = addFronteira(zAreas, t1, nr_areas);
-				zAreas = addFronteira(zAreas, t2, nr_areas);
-				zAreas = addFronteira(zAreas, t3, nr_areas);
+				zAreas = addAreaEnd(zAreas, last_id, tType, tCap, tNR, t1, t2, t3);
+				zAreas = addFronteira(zAreas, t1, last_id);
+				zAreas = addFronteira(zAreas, t2, last_id);
+				zAreas = addFronteira(zAreas, t3, last_id);
 				valid1=0;
 				valid2=0;
 				valid3=0;
@@ -134,8 +134,8 @@ void main(void) {
 		if(menuopt == 12){
 			do{
 				printf("ID da area a remover: ");
-				scanf("%d", %id);
-			}while (pesoActArea(id)!=0);
+				scanf("%d", &id);
+			}while (pesoActArea(zAreas, id)!=0);
 			zAreas = rmArea(zAreas, id);
 		}
 	}
