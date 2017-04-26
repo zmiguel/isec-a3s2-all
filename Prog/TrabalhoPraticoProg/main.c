@@ -23,13 +23,14 @@ void main(void) {
 	last_id = getLastAreaID(zAreas);
 
 	printf("READY!\n");
-	dispArea(zAreas);
 
 	for(;;){
+		dispArea(zAreas);
 		menuopt = menu();
 		if(menuopt == 0) break;
 		if(menuopt == 11){
 			last_id++;
+			tType=tNR=t1=t2=t3=-1; //reset vars
 			while(tType != 0 && tType != 1){
 				fflush(stdin);
 				printf("Tipo de area (0 = jaula, 1 = espaco vedado): ");
@@ -129,14 +130,22 @@ void main(void) {
 				valid3=0;
 			}
 			printf("Area Adicionada!!\n");
-			dispArea(zAreas);
 		}
 		if(menuopt == 12){
+			valid1=0;
 			do{
 				printf("ID da area a remover: ");
 				scanf("%d", &id);
-			}while (pesoActArea(zAreas, id)!=0);
+				if(pesoActArea(zAreas, id)!=0){
+					printf("Area selecionada ainda tem animais!\n");
+					valid1=0;
+				}else{
+					valid1=1;
+				}
+			}while (valid1!=1);
 			zAreas = rmArea(zAreas, id);
+			zAreas = rmFronteira(zAreas, id);
+			last_id = getLastAreaID(zAreas);
 		}
 	}
 
