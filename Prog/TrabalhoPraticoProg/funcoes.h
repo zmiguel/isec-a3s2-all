@@ -24,7 +24,6 @@ Areas * addAreaEnd(Areas *tAreas, int id, int tipo, int cap, int nr_front, int f
 	aux->prox->front2.id = front2;
 	aux->prox->front3.id = front3;
 	aux->prox->prox = NULL;
-
 	return tAreas;
 }
 
@@ -34,7 +33,7 @@ void dispIntro(void){
 	printf("\n#     #                                                 #######                                    \n#     #   ##   #      ######    #####    ##    ####     #       #       ####  #####  ######  ####  \n#     #  #  #  #      #         #    #  #  #  #         #       #      #    # #    # #      #      \n#     # #    # #      #####     #    # #    #  ####     #####   #      #    # #    # #####   ####  \n #   #  ###### #      #         #    # ######      #    #       #      #    # #####  #           # \n  # #   #    # #      #         #    # #    # #    #    #       #      #    # #   #  #      #    # \n   #    #    # ###### ######    #####  #    #  ####     #       ######  ####  #    # ######  ####  \n");
 }
 
-Areas * readAreas(Areas *tAreas, int *nr_areas){
+Areas * readAreas(Areas *tAreas){
 	int tID, tType, tCap, tNR, t1, t2, t3, i=0;
 	Areas *temp = tAreas;
 	FILE *f;
@@ -49,15 +48,12 @@ Areas * readAreas(Areas *tAreas, int *nr_areas){
 	do{
 		if(tNR == 1){
 			fscanf(f,"\t%d",&t1);
-			//printf("%d\t%d\t%d\t%d\t%d\n", tID, tType, tCap, tNR, t1);
 			temp = addAreaEnd(temp, tID, tType, tCap, tNR, t1, -1 , -1);
 		}else if(tNR == 2){
 			fscanf(f,"\t%d\t%d",&t1, &t2);
-			//printf("%d\t%d\t%d\t%d\t%d\t%d\n", tID, tType, tCap, tNR, t1, t2);
 			temp = addAreaEnd(temp, tID, tType, tCap, tNR, t1, t2, -1);
 		}else if(tNR == 3){
 			fscanf(f,"\t%d\t%d\t%d",&t1,&t2,&t3);
-			//printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\n", tID, tType, tCap, tNR, t1, t2, t3);
 			temp = addAreaEnd(temp, tID, tType, tCap, tNR, t1, t2, t3);
 		}else{
 			exit(0);
@@ -65,9 +61,8 @@ Areas * readAreas(Areas *tAreas, int *nr_areas){
 		fscanf(f,"%d\t%d\t%d\t%d", &tID, &tType, &tCap, &tNR);
 		i++;
 	}while(!feof(f));
-	*nr_areas = i;
 	fclose(f);
-	printf("Areas carregadas!!\n");
+	printf("%d areas carregadas!!\n", i);
 	return temp;
 }
 
@@ -109,7 +104,7 @@ void saveAreas(Areas *tAreas){
 
 	}
 	fclose(f);
-	printf("Areas guardadas!!\n");
+	printf("%d areas guardadas!!\n", *temp);
 }
 
 int nrFront(Areas *tArea, int id){
@@ -121,4 +116,62 @@ int nrFront(Areas *tArea, int id){
 	}while(temp->id != id);
 
 	return temp->nr_front;
+}
+
+Areas * addFronteira(Areas *tAreas, int exist, int novo){
+	Areas *temp = tAreas;
+	printf("A adicionar nova fronteira a area existente\n");
+	while(temp->prox != NULL){
+		temp = temp->prox;
+		if(temp->id == exist){
+			if(temp->nr_front == 1){
+				temp->nr_front++;
+				temp->front2.id=novo;
+			}else if(temp->nr_front == 2){
+				temp->nr_front++;
+				temp->front3.id=novo;
+			}
+		}
+	}
+	printf("Area existente actualizada!\n");
+	return tAreas;
+}
+
+int pesoActArea(Areas *tArea, int id){
+	Areas *temp = tArea;
+
+	do{
+		temp = temp->prox;
+		if(temp == NULL) return -1;
+	}while(temp->id != id);
+
+	return temp->pesoAct;
+}
+
+Areas * rmArea(Areas *tAreas, int id){
+	Areas *temp = tAreas;
+	printf("A adicionar nova fronteira a area existente\n");
+	while(temp->prox != NULL){
+		temp = temp->prox;
+		if(temp->prox->id == id){
+			if(temp->prox->prox == NULL){
+				temp->prox == NULL;
+			}else{
+				temp->prox = temp->prox->prox;
+			}
+			break;
+		}
+	}
+	printf("Area existente removida!\n");
+	return tAreas;
+}
+
+int getLastAreaID(Areas *tAreas){
+	Areas *temp = tAreas;
+	while(temp->prox != NULL){
+		temp = temp->prox;
+		if(temp->prox == NULL){
+			return temp->id;
+		}
+	}
 }
