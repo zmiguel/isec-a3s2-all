@@ -28,6 +28,25 @@ Areas * addAreaEnd(Areas *tAreas, int id, int tipo, int cap, int nr_front, int f
 	return tAreas;
 }
 
+Animais * addAnimaisEnd(Animais *tAnimais, int id, char *especie, char *nome, int peso, int locID, int pai, int mae, int filho) {
+	Animais *aux = tAnimais;
+
+	while (aux->prox != NULL) {
+		aux = aux->prox;
+	}
+	aux->prox = malloc(sizeof(Animais));
+	aux->prox->id = id;
+	strcpy(aux->prox->especie, especie);
+	strcpy(aux->prox->nome, nome);
+	aux->prox->peso = peso;
+	aux->prox->loc.id = locID;
+	aux->prox->familia.paiID = pai;
+	aux->prox->familia.maeID = mae;
+	aux->prox->familia.filhoID = filho;
+	aux->prox->prox = NULL;
+	return tAnimais;
+}
+
 void dispIntro(void){
 	printf("\n\tZZZZZZZZZZZZZZZZZZZ\n\tZ:::::::::::::::::Z\n\tZ:::::::::::::::::Z\n\tZ:::ZZZZZZZZ:::::Z\n\tZZZZZ     Z:::::Z     ooooooooooo      ooooooooooo\n\t        Z:::::Z     oo:::::::::::oo  oo:::::::::::oo\n\t       Z:::::Z     o:::::::::::::::oo:::::::::::::::o\n\t      Z:::::Z      o:::::ooooo:::::oo:::::ooooo:::::o\n\t     Z:::::Z       o::::o     o::::oo::::o     o::::o\n\t    Z:::::Z        o::::o     o::::oo::::o     o::::o\n\t   Z:::::Z         o::::o     o::::oo::::o     o::::o\n\tZZZ:::::Z     ZZZZZo::::o     o::::oo::::o     o::::o\n\tZ::::::ZZZZZZZZ:::Zo:::::ooooo:::::oo:::::ooooo:::::o\n\tZ:::::::::::::::::Zo:::::::::::::::oo:::::::::::::::o\n\tZ:::::::::::::::::Z oo:::::::::::oo  oo:::::::::::oo\n\tZZZZZZZZZZZZZZZZZZZ   ooooooooooo      ooooooooooo\n");
 
@@ -69,6 +88,31 @@ Areas * readAreas(Areas *tAreas){
 	return temp;
 }
 
+Animais * readAnimais(Animais *tAnimais){
+	Animais *temp = tAnimais;
+	Animais *read;
+	FILE *f;
+	int end;
+	printf("A procurar ficheiro de Animais...\n");
+	f = fopen("animais.dat","rb");
+	if(f==NULL){
+		printf("Fichero de animais nao encontrado, ou erro a abrir!\n");
+		return tAnimais;
+	}
+	printf("Ficheiro de animais encontrado e aberto!\n");
+	while(!feof(f)){
+		read = malloc(sizeof(Animais));
+		end = fread(read,sizeof(Animais),1,f);
+		if(end!=1) break;
+		temp->prox = read;
+		temp = temp->prox;
+
+	}
+
+	fclose(f);
+	return tAnimais;
+}
+
 void dispArea(Areas *tArea){
 	Areas *temp = tArea;
 
@@ -86,15 +130,21 @@ void dispArea(Areas *tArea){
 	}
 }
 
+void dispAnimais(Animais *tAnimais){
+	Animais *temp = tAnimais;
+	while(temp->prox != NULL){
+		temp = temp->prox;
+		printf("id: %d\tnome: %s\tespecie: %s\tpeso: %d\tarea: %d\tpai: %d\tmae: %d\tfilho: %d\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc.id, temp->familia.paiID, temp->familia.maeID, temp->familia.filhoID);
+	}
+}
+
 void saveAreas(Areas *tAreas){
-	int tID, tType, tCap, tNR, t1, t2, t3, i=0;
 	Areas *temp = tAreas;
 	FILE *f;
 	printf("A abrir ficheiro de Areas...\n");
 	f = fopen("areas.txt", "w+");
 	if(f==NULL){
 		printf("Erro a abrir ficheiro de areas!\n");
-		exit(0);
 	}
 	printf("A guardar Areas para ficheiro...\n");
 	while(temp->prox != NULL){
@@ -112,6 +162,23 @@ void saveAreas(Areas *tAreas){
 	}
 	fclose(f);
 	printf("areas guardadas!!\n");
+}
+
+void saveAnimais(Animais *tAnimais){
+	Animais *temp = tAnimais;
+	FILE *f;
+	printf("A abrir ficheiro de Animais...\n");
+	f = fopen("animais.dat", "wb+");
+	if(f==NULL){
+		printf("Erro a abrir ficheiro de Animais!\n");
+	}
+	printf("A guardar Animais para ficheiro...\n");
+	while(temp->prox != NULL){
+		temp = temp->prox;
+		fwrite(temp, sizeof(Animais), 1, f);
+	}
+	fclose(f);
+	printf("Animais guardados!\n");
 }
 
 int nrFront(Areas *tArea, int id){
@@ -211,6 +278,17 @@ Areas * rmFronteira(Areas *tAreas, int id){
 
 int getLastAreaID(Areas *tAreas){
 	Areas *temp = tAreas;
+	while(temp->prox != NULL){
+		temp = temp->prox;
+		if(temp->prox == NULL){
+			return temp->id;
+		}
+	}
+}
+
+int getLastAnimalID(Animais *tAnimais){
+	Animais *temp = tAnimais;
+	if(temp->prox == NULL) return 0;
 	while(temp->prox != NULL){
 		temp = temp->prox;
 		if(temp->prox == NULL){

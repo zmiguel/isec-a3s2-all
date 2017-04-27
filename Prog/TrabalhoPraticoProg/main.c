@@ -8,7 +8,7 @@
 #include "util.h"
 
 void main(void) {
-	int menuopt, last_id, tType=-1, tCap, tNR=0, t1=-1, t2=-2, t3=-3, valid1=0, valid2=0, valid3=0, id=0;
+	int menuopt, last_id, last_animal_id, tType=-1, tCap, tNR=0, t1=-1, t2=-2, t3=-3, valid1=0, valid2=0, valid3=0, id=0;
 
 	Areas *zAreas = NULL;
 	Animais *zAnimais = NULL;
@@ -21,11 +21,14 @@ void main(void) {
 
 	zAreas = readAreas(zAreas);
 	last_id = getLastAreaID(zAreas);
+	zAnimais = readAnimais(zAnimais);
+	last_animal_id = getLastAnimalID(zAnimais);
 
 	printf("READY!\n");
 
 	for(;;){
 		dispArea(zAreas);
+		dispAnimais(zAnimais);
 		menuopt = menu();
 		if(menuopt == 0) break;
 		if(menuopt == 11){
@@ -147,15 +150,38 @@ void main(void) {
 			zAreas = rmFronteira(zAreas, id);
 			last_id = getLastAreaID(zAreas);
 		}
+		if(menuopt == 211){//adicionar animal via ficheiro
+			printf("falta implementar!\n");
+		}
+		if(menuopt == 212){//adicionar animal via terminal
+			fflush(stdin);
+			int aID, aPeso, aPai, aMae, Afilho, aLoc;
+			char anome[100], aespecie[100];
+			printf("\nNome do animal: ");
+			gets(anome);
+			printf("Especie do animal: ");
+			gets(aespecie);
+			printf("Peso do animal: ");
+			scanf("%d", &aPeso);
+			printf("Localizacao do animal: ");
+			scanf("%d", &aLoc);
+			zAnimais = addAnimaisEnd(zAnimais,last_animal_id+1,aespecie,anome,aPeso,aLoc,-1,-1,-1);
+			last_animal_id++;
+			printf("Animal adicionado!\n\n");
+		}
+		if(menuopt == 22){//remover animal
+			printf("falta implementar!\n");
+		}
 	}
 
 	saveAreas(zAreas);
+	saveAnimais(zAnimais);
 }
 
 int menu(void){
 	int res;
 
-	printf("\nMenu:\n\t1 - Gerir Areas\n\t0 - Sair\n");
+	printf("\nMenu:\n\t1 - Gerir Areas\n\t2 - Gerir Animais\n\t0 - Sair\n");
 	printf("Escolha: ");
 	fflush(stdin);
 	scanf("%d", &res);
@@ -169,6 +195,20 @@ int menu(void){
 		scanf("%d", &res);
 		if(res == 1) return 11;
 		if(res == 2) return 12;
-
+	}else if(res == 2){
+		printf("\n\t1 - Adicionar Animal\n\t2 - Remover Animal\n");
+		printf("Escolha: ");
+		fflush(stdin);
+		scanf("%d", &res);
+		if(res == 1){
+			printf("\n\t1 - Adicionar via ficheiro\n\t2 - Adicionar via terminal\n\t3 - Cancelar\n");
+			printf("Escolha: ");
+			fflush(stdin);
+			scanf("%d", &res);
+			if(res == 1) return 211;
+			if(res == 2) return 212;
+			if(res == 3) return -1;
+		};
+		if(res == 2) return 22;
 	}
 }

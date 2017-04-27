@@ -3,6 +3,15 @@ struct area{
   struct area_st *area;
 };
 
+struct fam{
+	int paiID;
+	struct animais_st *pai;
+	int maeID;
+    struct animais_st *mae;
+	int filhoID;
+    struct animais_st *filho;
+};
+
 typedef struct area_st{
   int id;
   int tipo; // 0 = jaula, 1 = espaço vedado
@@ -24,10 +33,7 @@ typedef struct animais_st{
   int peso;
   struct area loc;
   //familia
-  struct animais_st *pai;
-  struct animais_st *mae;
-  struct animais_st *filho;
-  struct animais_st *irmao;
+  struct fam familia;
   //next ID
   struct animais_st *prox;
 }Animais;
