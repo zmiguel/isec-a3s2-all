@@ -4,6 +4,8 @@
 #include <string.h>
 
 #include "estruturas.h"
+#include "func_areas.h"
+#include "func_animais.h"
 #include "funcoes.h"
 #include "util.h"
 
