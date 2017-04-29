@@ -8,8 +8,6 @@ struct fam{
 	struct animais_st *pai;
 	int maeID;
     struct animais_st *mae;
-	int filhoID;
-    struct animais_st *filho;
 };
 
 typedef struct area_st{

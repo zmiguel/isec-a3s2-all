@@ -4,10 +4,10 @@
 #include <string.h>
 
 #include "estruturas.h"
+#include "util.h"
 #include "func_areas.h"
 #include "func_animais.h"
 #include "funcoes.h"
-#include "util.h"
 
 void main(void) {
 	int menuopt, last_id, last_animal_id, tType=-1, tCap, tNR=0, t1=-1, t2=-2, t3=-3, valid1=0, valid2=0, valid3=0, id=0;
@@ -22,18 +22,19 @@ void main(void) {
 	printf("\n");
 
 	zAreas = readAreas(zAreas);
+	zAreas = linkAreas(zAreas);
 	last_id = getLastAreaID(zAreas);
-	zAnimais = readAnimais(zAnimais);
+	zAnimais = readAnimais(zAnimais, zAreas);
 	last_animal_id = getLastAnimalID(zAnimais);
 
 	printf("READY!\n");
 
 	for(;;){
-		dispArea(zAreas);
-		dispAnimais(zAnimais);
+		//dispArea(zAreas);
+		//dispAnimais(zAnimais);
 		menuopt = menu();
 		if(menuopt == 0) break;
-		if(menuopt == 11){
+		if(menuopt == 11){//adicionar area
 			last_id++;
 			tType=tNR=t1=t2=t3=-1; //reset vars
 			while(tType != 0 && tType != 1){
@@ -136,7 +137,7 @@ void main(void) {
 			}
 			printf("Area Adicionada!!\n");
 		}
-		if(menuopt == 12){
+		if(menuopt == 12){//remover area por id
 			valid1=0;
 			do{
 				printf("ID da area a remover: ");
@@ -152,8 +153,15 @@ void main(void) {
 			zAreas = rmFronteira(zAreas, id);
 			last_id = getLastAreaID(zAreas);
 		}
+		if(menuopt == 13) dispArea(zAreas);
 		if(menuopt == 211){//adicionar animal via ficheiro
-			printf("falta implementar!\n");
+			fflush(stdin);
+			printf("[NOTA] O ficheiro tem de estar na mesma pasta que o .exe deste programa!!\n");
+			printf("[NOTA] O ficheor deve estar no formato:\n\tESPECIE <tab> NOME <tab> PESO <tab> AREA_ID\n\n");
+			printf("Indique nome do ficheiro a importar: ");
+			char nfile[100];
+			gets(nfile);
+			zAnimais = importAnimaisFile(zAnimais, nfile, zAreas);
 		}
 		if(menuopt == 212){//adicionar animal via terminal
 			fflush(stdin);
@@ -167,12 +175,43 @@ void main(void) {
 			scanf("%d", &aPeso);
 			printf("Localizacao do animal: ");
 			scanf("%d", &aLoc);
-			zAnimais = addAnimaisEnd(zAnimais,last_animal_id+1,aespecie,anome,aPeso,aLoc,-1,-1,-1);
+			zAnimais = addAnimaisEnd(zAnimais,zAreas,last_animal_id+1,aespecie,anome,aPeso,aLoc,-1,-1);
 			last_animal_id++;
 			printf("Animal adicionado!\n\n");
 		}
 		if(menuopt == 22){//remover animal
 			printf("falta implementar!\n");
+		}
+		if(menuopt == 231){//Lista dodos os animais
+			dispAnimais(zAnimais);
+		}
+		if(menuopt == 232){//Lista dodos os animais na area X
+			fflush(stdin);
+			int aID;
+			printf("\nID da area a procurar: ");
+			scanf("%d", &aID);
+			dispAnimaisArea(zAnimais, zAreas, aID);
+		}
+		if(menuopt == 233){//Lista dodos os animais da especia X
+			fflush(stdin);
+			char aespecie[100];
+			printf("\nEspecie a procurar: ");
+			gets(aespecie);
+			dispAnimaisEspecie(zAnimais, aespecie);
+		}
+		if(menuopt == 241){//info animal por id
+			fflush(stdin);
+			int aID;
+			printf("\nID do animal: ");
+			scanf("%d", &aID);
+			dispAnimalID(zAnimais, aID);
+		}
+		if(menuopt == 242){//info animal por nome
+			fflush(stdin);
+			char nome[100];
+			printf("\nNome do animal: ");
+			gets(nome);
+			dispAnimalNome(zAnimais, nome);
 		}
 	}
 
@@ -191,14 +230,16 @@ int menu(void){
 	if(res == 0){
 		return 0;
 	}else if(res == 1){
-		printf("\n\t1 - Adicionar Area\n\t2 - Remover Area\n");
+		printf("Areas:\n\t1 - Adicionar Area\n\t2 - Remover Area\n\t3 - Listagem todas as areas\n\t4 - Cancelar\n");
 		printf("Escolha: ");
 		fflush(stdin);
 		scanf("%d", &res);
 		if(res == 1) return 11;
 		if(res == 2) return 12;
+		if(res == 3) return 13;
+		if(res == 4) return -1;
 	}else if(res == 2){
-		printf("\n\t1 - Adicionar Animal\n\t2 - Remover Animal\n");
+		printf("Animais:\n\t1 - Adicionar Animal\n\t2 - Remover Animal\n\t3 - Listagem Animais\n\t4 - Info\n\t5 - Cancelar\n");
 		printf("Escolha: ");
 		fflush(stdin);
 		scanf("%d", &res);
@@ -212,5 +253,25 @@ int menu(void){
 			if(res == 3) return -1;
 		};
 		if(res == 2) return 22;
+		if(res == 3){
+			printf("Listagem de:\n\t1 - Todos os animais\n\t2 - Animais na Area X\n\t3 - Animais da especie X\n\t4 - Cancelar\n");
+			printf("Escolha: ");
+			fflush(stdin);
+			scanf("%d", &res);
+			if(res == 1) return 231;
+			if(res == 2) return 232;
+			if(res == 3) return 233;
+			if(res == 4) return -1;
+		}
+		if(res == 4){
+			printf("Info:\n\t1 - Animal por ID\n\t2 - Animais por nome\n\t3 - Cancelar\n");
+			printf("Escolha: ");
+			fflush(stdin);
+			scanf("%d", &res);
+			if(res == 1) return 241;
+			if(res == 2) return 242;
+			if(res == 3) return -1;
+		}
+		if(res == 5) return -1;
 	}
 }

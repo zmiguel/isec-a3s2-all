@@ -54,17 +54,18 @@ Areas * readAreas(Areas *tAreas){
 
 void dispArea(Areas *tArea){
 	Areas *temp = tArea;
+	printf("[AREAS]\n");
 
 	while(temp->prox != NULL){
 		temp = temp->prox;
 		if(temp->nr_front == 0){
-			printf("id:%d\ttipo:%d\tcap:%d\n", temp->id, temp->tipo, temp->cap);
+			printf("[ID] (%d)   [Tipo] (%d)   [CAP] (%d/%d)\n", temp->id, temp->tipo, temp->pesoAct, temp->cap);
 		}else if(temp->nr_front == 1){
-			printf("id:%d\ttipo:%d\tcap:%d\tfront1:%d\n", temp->id, temp->tipo, temp->cap, temp->front1.id);
+			printf("[ID] (%d)   [Tipo] (%d)   [CAP] (%d/%d)   [F1] (%d)\n", temp->id, temp->tipo, temp->pesoAct, temp->cap, temp->front1.area->id);
 		}else if(temp->nr_front == 2){
-			printf("id:%d\ttipo:%d\tcap:%d\tfront1:%d\tfront2:%d\n", temp->id, temp->tipo, temp->cap, temp->front1.id, temp->front2.id);
+			printf("[ID] (%d)   [Tipo] (%d)   [CAP] (%d/%d)   [F1] (%d)   [F2] (%d)\n", temp->id, temp->tipo, temp->pesoAct, temp->cap, temp->front1.area->id, temp->front2.area->id);
 		}else if(temp->nr_front == 3){
-			printf("id:%d\ttipo:%d\tcap:%d\tfront1:%d\tfront2:%d\tfront3:%d\n", temp->id, temp->tipo, temp->cap, temp->front1.id, temp->front2.id, temp->front3.id);
+			printf("[ID] (%d)   [Tipo] (%d)   [CAP] (%d/%d)   [F1] (%d)   [F2] (%d)   [F3] (%d)\n", temp->id, temp->tipo, temp->pesoAct, temp->cap, temp->front1.area->id, temp->front2.area->id, temp->front3.area->id);
 		}
 	}
 }
@@ -136,16 +137,31 @@ int pesoActArea(Areas *tArea, int id){
 	return temp->pesoAct;
 }
 
+int capArea(Areas *tArea, int id){
+	Areas *temp = tArea;
+
+	do{
+		temp = temp->prox;
+		if(temp == NULL) return -1;
+	}while(temp->id != id);
+
+	return temp->cap;
+}
+
 Areas * rmArea(Areas *tAreas, int id){
 	Areas *temp = tAreas;
 	while(temp->prox != NULL){
 		if(temp->prox->id == id){
-			if(temp->prox->prox == NULL){
-				temp->prox = NULL;
+			if(temp->prox->pesoAct != 0){
+				printf("area ainda tem animais!\n");
 			}else{
-				temp->prox = temp->prox->prox;
+				if(temp->prox->prox == NULL){
+					temp->prox = NULL;
+				}else{
+					temp->prox = temp->prox->prox;
+				}
+				break;
 			}
-			break;
 		}
 		temp = temp->prox;
 	}
@@ -198,4 +214,31 @@ int getLastAreaID(Areas *tAreas){
 			return temp->id;
 		}
 	}
+}
+
+Areas * linkAreas(Areas *tAreas){
+	Areas *temp = tAreas;
+	Areas *temp2 = tAreas;
+	Areas *move;
+	while(temp->prox != NULL){
+		temp = temp->prox;
+		temp2 = tAreas;
+		while(temp2->prox != NULL){
+			move = malloc(sizeof(Areas));
+			temp2 = temp2->prox;
+			if(temp2->id == temp->front1.id){
+				move = temp2;
+				temp->front1.area = move;
+			}
+			if(temp2->id == temp->front2.id){
+				move = temp2;
+				temp->front2.area = move;
+			}
+			if(temp2->id == temp->front3.id){
+				move = temp2;
+				temp->front3.area = move;
+			}
+		}
+	}
+	return tAreas;
 }
