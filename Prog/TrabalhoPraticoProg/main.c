@@ -30,8 +30,8 @@ void main(void) {
 	printf("READY!\n");
 
 	for(;;){
-		//dispArea(zAreas);
-		//dispAnimais(zAnimais);
+		dispArea(zAreas);
+		dispAnimais(zAnimais);
 		menuopt = menu();
 		if(menuopt == 0) break;
 		if(menuopt == 11){//adicionar area
@@ -160,7 +160,7 @@ void main(void) {
 			printf("[NOTA] O ficheor deve estar no formato:\n\tESPECIE <tab> NOME <tab> PESO <tab> AREA_ID\n\n");
 			printf("Indique nome do ficheiro a importar: ");
 			char nfile[100];
-			gets(nfile);
+			scanf("%s", nfile);
 			zAnimais = importAnimaisFile(zAnimais, nfile, zAreas);
 		}
 		if(menuopt == 212){//adicionar animal via terminal
@@ -168,9 +168,9 @@ void main(void) {
 			int aID, aPeso, aPai, aMae, Afilho, aLoc;
 			char anome[100], aespecie[100];
 			printf("\nNome do animal: ");
-			gets(anome);
+			scanf("%s", anome);
 			printf("Especie do animal: ");
-			gets(aespecie);
+			scanf("%s", aespecie);
 			printf("Peso do animal: ");
 			scanf("%d", &aPeso);
 			printf("Localizacao do animal: ");
@@ -179,8 +179,17 @@ void main(void) {
 			last_animal_id++;
 			printf("Animal adicionado!\n\n");
 		}
-		if(menuopt == 22){//remover animal
-			printf("falta implementar!\n");
+		if(menuopt == 221){//remover animal por id
+			int aID;
+			printf("ID do animal a remover: ");
+			scanf("%d", &aID);
+			rmAnimalID(zAnimais, zAreas, aID);
+		}
+		if(menuopt == 222){//remover animal por nome
+			char nome[100];
+			printf("Nome do animal a remover: ");
+			scanf("%s", nome);
+			rmAnimalNome(zAnimais, zAreas, nome);
 		}
 		if(menuopt == 231){//Lista dodos os animais
 			dispAnimais(zAnimais);
@@ -196,7 +205,7 @@ void main(void) {
 			fflush(stdin);
 			char aespecie[100];
 			printf("\nEspecie a procurar: ");
-			gets(aespecie);
+			scanf("%s", aespecie);
 			dispAnimaisEspecie(zAnimais, aespecie);
 		}
 		if(menuopt == 241){//info animal por id
@@ -210,8 +219,17 @@ void main(void) {
 			fflush(stdin);
 			char nome[100];
 			printf("\nNome do animal: ");
-			gets(nome);
+			scanf("%s", nome);
 			dispAnimalNome(zAnimais, nome);
+		}
+		if(menuopt == 25){//transferir animal por ID
+			int aID, destID;
+			fflush(stdin);
+			printf("ID do animal a transferir: ");
+			scanf("%d", &aID);
+			printf("ID da area destino: ");
+			scanf("%d", &destID);
+			transfAnimal(zAnimais, zAreas, aID, destID);
 		}
 	}
 
@@ -239,7 +257,7 @@ int menu(void){
 		if(res == 3) return 13;
 		if(res == 4) return -1;
 	}else if(res == 2){
-		printf("Animais:\n\t1 - Adicionar Animal\n\t2 - Remover Animal\n\t3 - Listagem Animais\n\t4 - Info\n\t5 - Cancelar\n");
+		printf("Animais:\n\t1 - Adicionar Animal\n\t2 - Remover Animal\n\t3 - Listagem Animais\n\t4 - Info\n\t5 - Transferir animal\n\t6 - Cancelar\n");
 		printf("Escolha: ");
 		fflush(stdin);
 		scanf("%d", &res);
@@ -252,7 +270,15 @@ int menu(void){
 			if(res == 2) return 212;
 			if(res == 3) return -1;
 		};
-		if(res == 2) return 22;
+		if(res == 2){
+			printf("Remover animal por:\n\t1 - ID\n\t2 - Nome\n\t3 - Cancelar\n");
+			printf("Escolha: ");
+			fflush(stdin);
+			scanf("%d", &res);
+			if(res == 1) return 221;
+			if(res == 2) return 222;
+			if(res == 3) return -1;
+		}
 		if(res == 3){
 			printf("Listagem de:\n\t1 - Todos os animais\n\t2 - Animais na Area X\n\t3 - Animais da especie X\n\t4 - Cancelar\n");
 			printf("Escolha: ");
@@ -272,6 +298,7 @@ int menu(void){
 			if(res == 2) return 242;
 			if(res == 3) return -1;
 		}
-		if(res == 5) return -1;
+		if(res == 5) return 25;
+		if(res == 6) return -1;
 	}
 }

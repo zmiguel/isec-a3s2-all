@@ -151,22 +151,29 @@ int capArea(Areas *tArea, int id){
 Areas * rmArea(Areas *tAreas, int id){
 	Areas *temp = tAreas;
 	while(temp->prox != NULL){
+		temp = temp->prox;
+		if(temp->id == id){
+			tAreas = temp->prox;
+			printf("Area removida!\n");
+			return tAreas;
+		}
 		if(temp->prox->id == id){
 			if(temp->prox->pesoAct != 0){
 				printf("area ainda tem animais!\n");
 			}else{
 				if(temp->prox->prox == NULL){
 					temp->prox = NULL;
+					printf("Area removida!\n");
+					return tAreas;
 				}else{
 					temp->prox = temp->prox->prox;
+					printf("Area removida!\n");
+					return tAreas;
 				}
 				break;
 			}
 		}
-		temp = temp->prox;
 	}
-	printf("Area removida!\n");
-	return tAreas;
 }
 
 Areas * rmFronteira(Areas *tAreas, int id){
