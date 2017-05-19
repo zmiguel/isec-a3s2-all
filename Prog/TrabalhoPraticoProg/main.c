@@ -11,7 +11,7 @@
 
 int main(void) {
 	int menuopt, last_id, last_animal_id, tType=-1, tCap, tNR=0, t1=-1, t2=-2, t3=-3, valid1=0, valid2=0, valid3=0, id=0;
-
+	char ch;
 	Areas *zAreas = NULL;
 	Animais *zAnimais = NULL;
 
@@ -40,15 +40,15 @@ int main(void) {
 			last_id++;
 			tType=tNR=t1=t2=t3=-1; //reset vars
 			while(tType != 0 && tType != 1){
-				fflush(stdin);
+				while (((ch = getchar()) != EOF) && (ch != '\n')) putchar(ch); // limpa o buffer stdin para usar o fgets
 				printf("Tipo de area (0 = jaula, 1 = espaco vedado): ");
 				scanf("%d", &tType);
 			}
-			fflush(stdin);
+			while (((ch = getchar()) != EOF) && (ch != '\n')) putchar(ch); // limpa o buffer stdin para usar o fgets
 			printf("Capacidade maxima: ");
 			scanf("%d", &tCap);
 			while(tNR != 1 && tNR != 2 && tNR != 3){
-				fflush(stdin);
+				while (((ch = getchar()) != EOF) && (ch != '\n')) putchar(ch); // limpa o buffer stdin para usar o fgets
 				printf("Numero de Fronteiras (1/2/3): ");
 				scanf("%d", &tNR);
 			}
@@ -157,22 +157,25 @@ int main(void) {
 		}
 		if(menuopt == 13) dispArea(zAreas);
 		if(menuopt == 211){//adicionar animal via ficheiro
-			fflush(stdin);
+			while (((ch = getchar()) != EOF) && (ch != '\n')) putchar(ch); // limpa o buffer stdin para usar o fgets
 			printf("[NOTA] O ficheiro tem de estar na mesma pasta que o .exe deste programa!!\n");
 			printf("[NOTA] O ficheor deve estar no formato:\n\tESPECIE <tab> NOME <tab> PESO <tab> AREA_ID\n\n");
 			printf("Indique nome do ficheiro a importar: ");
 			char nfile[100];
-			scanf("%s", nfile);
+			fgets(nfile, sizeof(nfile), stdin);
+			strtok(nfile, "\n");
 			zAnimais = importAnimaisFile(zAnimais, nfile, zAreas);
 		}
 		if(menuopt == 212){//adicionar animal via terminal
-			//fflush(stdin);
 			int aPeso, aLoc;
 			char anome[100], aespecie[100];
+			while (((ch = getchar()) != EOF) && (ch != '\n')) putchar(ch); // limpa o buffer stdin para usar o fgets
 			printf("\nNome do animal: ");
-			scanf("%s", anome);
+			fgets(anome, sizeof(anome), stdin);
+			strtok(anome, "\n");
 			printf("Especie do animal: ");
-			scanf("%s", aespecie);
+			fgets(aespecie, sizeof(aespecie), stdin);
+			strtok(aespecie, "\n");
 			printf("Peso do animal: ");
 			scanf("%d", &aPeso);
 			printf("Localizacao do animal: ");
@@ -189,43 +192,46 @@ int main(void) {
 		if(menuopt == 222){//remover animal por nome
 			char nome[100];
 			printf("Nome do animal a remover: ");
-			scanf("%s", nome);
+			fgets(nome, sizeof(nome),stdin);
+			strtok(nome, "\n");
 			rmAnimalNome(zAnimais, zAreas, nome);
 		}
 		if(menuopt == 231){//Lista dodos os animais
 			dispAnimais(zAnimais);
 		}
 		if(menuopt == 232){//Lista dodos os animais na area X
-			fflush(stdin);
+			while (((ch = getchar()) != EOF) && (ch != '\n')) putchar(ch); // limpa o buffer stdin para usar o fgets
 			int aID;
 			printf("\nID da area a procurar: ");
 			scanf("%d", &aID);
 			dispAnimaisArea(zAnimais, zAreas, aID);
 		}
 		if(menuopt == 233){//Lista dodos os animais da especia X
-			fflush(stdin);
+			while (((ch = getchar()) != EOF) && (ch != '\n')) putchar(ch); // limpa o buffer stdin para usar o fgets
 			char aespecie[100];
 			printf("\nEspecie a procurar: ");
-			scanf("%s", aespecie);
+			fgets(aespecie, sizeof(aespecie),stdin);
+			strtok(aespecie, "\n");
 			dispAnimaisEspecie(zAnimais, aespecie);
 		}
 		if(menuopt == 241){//info animal por id
-			fflush(stdin);
+			while (((ch = getchar()) != EOF) && (ch != '\n')) putchar(ch); // limpa o buffer stdin para usar o fgets
 			int aID;
 			printf("\nID do animal: ");
 			scanf("%d", &aID);
 			dispAnimalID(zAnimais, aID);
 		}
 		if(menuopt == 242){//info animal por nome
-			fflush(stdin);
+			while (((ch = getchar()) != EOF) && (ch != '\n')) putchar(ch); // limpa o buffer stdin para usar o fgets
 			char nome[100];
 			printf("\nNome do animal: ");
-			scanf("%s", nome);
+			fgets(nome, sizeof(nome),stdin);
+			strtok(nome, "\n");
 			dispAnimalNome(zAnimais, nome);
 		}
 		if(menuopt == 25){//transferir animal por ID
 			int aID, destID;
-			fflush(stdin);
+			while (((ch = getchar()) != EOF) && (ch != '\n')) putchar(ch); // limpa o buffer stdin para usar o fgets
 			printf("ID do animal a transferir: ");
 			scanf("%d", &aID);
 			printf("ID da area destino: ");
@@ -243,7 +249,7 @@ int menu(void){
 
 	printf("\nMenu:\n\t1 - Gerir Areas\n\t2 - Gerir Animais\n\t0 - Sair\n");
 	printf("Escolha: ");
-	fflush(stdin);
+
 	scanf("%d", &res);
 
 	if(res == 0){
@@ -251,7 +257,6 @@ int menu(void){
 	}else if(res == 1){
 		printf("Areas:\n\t1 - Adicionar Area\n\t2 - Remover Area\n\t3 - Listagem todas as areas\n\t4 - Cancelar\n");
 		printf("Escolha: ");
-		fflush(stdin);
 		scanf("%d", &res);
 		if(res == 1) return 11;
 		if(res == 2) return 12;
@@ -260,12 +265,10 @@ int menu(void){
 	}else if(res == 2){
 		printf("Animais:\n\t1 - Adicionar Animal\n\t2 - Remover Animal\n\t3 - Listagem Animais\n\t4 - Info\n\t5 - Transferir animal\n\t6 - Cancelar\n");
 		printf("Escolha: ");
-		fflush(stdin);
 		scanf("%d", &res);
 		if(res == 1){
 			printf("\n\t1 - Adicionar via ficheiro\n\t2 - Adicionar via terminal\n\t3 - Cancelar\n");
 			printf("Escolha: ");
-			fflush(stdin);
 			scanf("%d", &res);
 			if(res == 1) return 211;
 			if(res == 2) return 212;
@@ -274,7 +277,6 @@ int menu(void){
 		if(res == 2){
 			printf("Remover animal por:\n\t1 - ID\n\t2 - Nome\n\t3 - Cancelar\n");
 			printf("Escolha: ");
-			fflush(stdin);
 			scanf("%d", &res);
 			if(res == 1) return 221;
 			if(res == 2) return 222;
@@ -283,7 +285,6 @@ int menu(void){
 		if(res == 3){
 			printf("Listagem de:\n\t1 - Todos os animais\n\t2 - Animais na Area X\n\t3 - Animais da especie X\n\t4 - Cancelar\n");
 			printf("Escolha: ");
-			fflush(stdin);
 			scanf("%d", &res);
 			if(res == 1) return 231;
 			if(res == 2) return 232;
@@ -293,7 +294,6 @@ int menu(void){
 		if(res == 4){
 			printf("Info:\n\t1 - Animal por ID\n\t2 - Animais por nome\n\t3 - Cancelar\n");
 			printf("Escolha: ");
-			fflush(stdin);
 			scanf("%d", &res);
 			if(res == 1) return 241;
 			if(res == 2) return 242;
