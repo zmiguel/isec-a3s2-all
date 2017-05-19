@@ -32,7 +32,7 @@ Animais * readAnimais(Animais *tAnimais, Areas *tAreas){
 	Areas *ta = tAreas;
 	Animais *read;
 	FILE *f;
-	int end;
+	unsigned long end;
 	printf("A procurar ficheiro de Animais...\n");
 	f = fopen("animais.dat","rb");
 	if(f==NULL){
@@ -64,9 +64,9 @@ Animais * readAnimais(Animais *tAnimais, Areas *tAreas){
 						if((ta->front2.area->pesoAct + read->peso) <= ta->front2.area->cap){
 							ta->front2.area->pesoAct += read->peso;
 							read->loc.id = ta->front2.area->id;
-							read->loc.area = ta->front2.area;
+                            read->loc.area = ta->front2.area;
 							temp->prox = read;
-							temp = temp->prox;
+                            temp = temp->prox;
 							break;
 						}
 					}
@@ -74,23 +74,22 @@ Animais * readAnimais(Animais *tAnimais, Areas *tAreas){
 						if((ta->front3.area->pesoAct + read->peso) <= ta->front3.area->cap){
 							ta->front3.area->pesoAct += read->peso;
 							read->loc.id = ta->front3.area->id;
-							read->loc.area = ta->front3.area;
+                            read->loc.area = ta->front3.area;
 							temp->prox = read;
-							temp = temp->prox;
+                            temp = temp->prox;
 							break;
 						}
 					}
 				}else{//area tem capacidade para ter o animal
 					ta->pesoAct += read->peso;
-					read->loc.area = ta;
+                    read->loc.area = ta;
 					temp->prox = read;
-					temp = temp->prox;
+                    temp = temp->prox;
 					break;
 				}
 			}
 		}
 	}
-
 	fclose(f);
 	return tAnimais;
 }
@@ -209,7 +208,6 @@ void dispAnimalNome(Animais *tAnimais, char *nome){
 void rmAnimalID(Animais *tAnimais, Areas *tAreas, int id){
 	Animais *temp = tAnimais;
 	Animais *ani = malloc(sizeof(Animais));
-	Areas *ta = tAreas;
 
 	while(temp->prox != NULL){
 		temp = temp->prox;
@@ -249,7 +247,6 @@ void rmAnimalID(Animais *tAnimais, Areas *tAreas, int id){
 void rmAnimalNome(Animais *tAnimais, Areas *tAreas, char *nome){
 	Animais *temp = tAnimais;
 	Animais *ani = malloc(sizeof(Animais));
-	Areas *ta = tAreas;
 
 	while(temp->prox != NULL){
 		temp = temp->prox;
@@ -289,7 +286,6 @@ void rmAnimalNome(Animais *tAnimais, Areas *tAreas, char *nome){
 void transfAnimal(Animais *tAnimais, Areas *tAreas, int id, int desto){
 	Animais *temp = tAnimais;
 	Areas *ta = tAreas;
-	int i=1,a=1;
 
 	while(temp->prox != NULL){
 		temp = temp->prox;
@@ -371,4 +367,5 @@ int getLastAnimalID(Animais *tAnimais){
 			return temp->id;
 		}
 	}
+	return 0;
 }

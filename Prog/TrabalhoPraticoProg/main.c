@@ -9,7 +9,7 @@
 #include "func_animais.h"
 #include "funcoes.h"
 
-void main(void) {
+int main(void) {
 	int menuopt, last_id, last_animal_id, tType=-1, tCap, tNR=0, t1=-1, t2=-2, t3=-3, valid1=0, valid2=0, valid3=0, id=0;
 
 	Areas *zAreas = NULL;
@@ -119,7 +119,7 @@ void main(void) {
 					}
 				}
 				while (valid3 != 1) {
-					while(t3 >= last_id || t3 < 1 || t3 == t1 && t3 == t2){
+					while(t3 >= last_id || t3 < 1 || (t3 == t1 && t3 == t2)){
 						printf("ID fronteira 2: ");
 						scanf("%d", &t3);
 					}
@@ -166,8 +166,8 @@ void main(void) {
 			zAnimais = importAnimaisFile(zAnimais, nfile, zAreas);
 		}
 		if(menuopt == 212){//adicionar animal via terminal
-			fflush(stdin);
-			int aID, aPeso, aPai, aMae, Afilho, aLoc;
+			//fflush(stdin);
+			int aPeso, aLoc;
 			char anome[100], aespecie[100];
 			printf("\nNome do animal: ");
 			scanf("%s", anome);
@@ -302,4 +302,5 @@ int menu(void){
 		if(res == 5) return 25;
 		if(res == 6) return -1;
 	}
+	return -1;
 }

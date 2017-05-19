@@ -174,6 +174,7 @@ Areas * rmArea(Areas *tAreas, int id){
 			}
 		}
 	}
+	return tAreas;
 }
 
 Areas * rmFronteira(Areas *tAreas, int id){
@@ -221,6 +222,7 @@ int getLastAreaID(Areas *tAreas){
 			return temp->id;
 		}
 	}
+	return 0;
 }
 
 Areas * linkAreas(Areas *tAreas){

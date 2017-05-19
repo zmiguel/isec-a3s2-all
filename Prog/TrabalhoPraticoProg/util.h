@@ -20,6 +20,6 @@ void dispAnimalID(Animais *tAnimais, int id);
 void dispAnimalNome(Animais *tAnimais, char *nome);
 void dispArea(Areas *tArea);
 void dispIntro(void);
-void main(void);
+int main(void);
 void saveAnimais(Animais *tAnimais);
 void saveAreas(Areas *tAreas);
