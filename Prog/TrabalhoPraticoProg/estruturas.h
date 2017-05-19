@@ -3,11 +3,9 @@ struct area{
   struct area_st *area;
 };
 
-struct fam{
-	int paiID;
-	struct animais_st *pai;
-	int maeID;
-    struct animais_st *mae;
+struct animal_s{
+	int filhoID;
+	struct animais_st *strt;
 };
 
 typedef struct area_st{
@@ -30,8 +28,8 @@ typedef struct animais_st{
   char nome[100];
   int peso;
   struct area loc;
-  //familia
-  struct fam familia;
+  //filho
+  struct animal_s filho;
   //next ID
   struct animais_st *prox;
 }Animais;

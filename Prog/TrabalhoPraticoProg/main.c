@@ -32,6 +32,8 @@ void main(void) {
 	for(;;){
 		dispArea(zAreas);
 		dispAnimais(zAnimais);
+		last_id = getLastAreaID(zAreas);
+		last_animal_id = getLastAnimalID(zAnimais);
 		menuopt = menu();
 		if(menuopt == 0) break;
 		if(menuopt == 11){//adicionar area
@@ -175,8 +177,7 @@ void main(void) {
 			scanf("%d", &aPeso);
 			printf("Localizacao do animal: ");
 			scanf("%d", &aLoc);
-			zAnimais = addAnimaisEnd(zAnimais,zAreas,last_animal_id+1,aespecie,anome,aPeso,aLoc,-1,-1);
-			last_animal_id++;
+			zAnimais = addAnimaisEnd(zAnimais,zAreas,last_animal_id+1,aespecie,anome,aPeso,aLoc,-1);
 			printf("Animal adicionado!\n\n");
 		}
 		if(menuopt == 221){//remover animal por id

@@ -1,4 +1,4 @@
-Animais * addAnimaisEnd(Animais *tAnimais, Areas *tAreas, int id, char *especie, char *nome, int peso, int locID, int pai, int mae);
+Animais * addAnimaisEnd(Animais *tAnimais, Areas *tAreas, int id, char *especie, char *nome, int peso, int locID, int filho);
 Animais * importAnimaisFile(Animais *tAnimais, char *nfile, Areas *tAreas);
 Animais * readAnimais(Animais *tAnimais, Areas *tAreas);
 Areas * addAreaEnd(Areas *tAreas, int id, int tipo, int cap, int nr_front, int front1, int front2, int front3);
