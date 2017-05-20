@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "estruturas.h"
 #include "util.h"
@@ -25,6 +26,7 @@ int main(void) {
 	zAreas = linkAreas(zAreas);
 	last_id = getLastAreaID(zAreas);
 	zAnimais = readAnimais(zAnimais, zAreas);
+	linkAnimais(zAnimais, zAreas);
 	last_animal_id = getLastAnimalID(zAnimais);
 
 	printf("READY!\n");
@@ -238,6 +240,38 @@ int main(void) {
 			scanf("%d", &destID);
 			transfAnimal(zAnimais, zAreas, aID, destID);
 		}
+		if(menuopt == 261){//Criar Filho a partir de 1 animal
+			char nome[100];
+			int aID;
+			while (((ch = getchar()) != EOF) && (ch != '\n')) putchar(ch); // limpa o buffer stdin para usar o fgets
+			printf("Indique o ID do animal que vai ter o filho: ");
+			scanf("%d", &aID);
+			printf("Indique o nome que deseja dar ao Filho: ");
+			while (((ch = getchar()) != EOF) && (ch != '\n')) putchar(ch); // limpa o buffer stdin para usar o fgets
+			fgets(nome, sizeof(nome),stdin);
+			strtok(nome, "\n");
+			criaFilho1(zAnimais,zAreas,aID,nome);
+		}
+		if(menuopt == 262){//Criar Filho a partir de 2 animais
+			char nome[100];
+			int aID1=0, aID2=0;
+			printf("\nNOTA!!!\n\tPara poder ser criado um filho a partir de 2 animais o seguinte tem de ser verdade:\n\n\t- Ambos os animais da mesma especie;\n\t- Ambos os animais na mesma area do Zoo.\n\n");
+			while (((ch = getchar()) != EOF) && (ch != '\n')) putchar(ch); // limpa o buffer stdin para usar o fgets
+			printf("Indique o ID do primeiro animal que vai ter o filho: ");
+			scanf("%d", &aID1);
+			printf("Indique o ID do segundo animal que vai ter o filho: ");
+			scanf("%d", &aID2);
+			while(verifyFilho2(zAnimais,aID1,aID2) != true){
+				printf("Animais incompativeis para criar um filho!\n");
+				printf("Indique o ID do segundo animal que vai ter o filho: ");
+				scanf("%d", &aID2);
+			}
+			printf("Indique o nome que deseja dar ao Filho: ");
+			while (((ch = getchar()) != EOF) && (ch != '\n')) putchar(ch); // limpa o buffer stdin para usar o fgets
+			fgets(nome, sizeof(nome),stdin);
+			strtok(nome, "\n");
+			criaFilho2(zAnimais,zAreas,aID1,aID2,nome);
+		}
 	}
 
 	saveAreas(zAreas);
@@ -263,7 +297,7 @@ int menu(void){
 		if(res == 3) return 13;
 		if(res == 4) return -1;
 	}else if(res == 2){
-		printf("Animais:\n\t1 - Adicionar Animal\n\t2 - Remover Animal\n\t3 - Listagem Animais\n\t4 - Info\n\t5 - Transferir animal\n\t6 - Cancelar\n");
+		printf("Animais:\n\t1 - Adicionar Animal\n\t2 - Remover Animal\n\t3 - Listagem Animais\n\t4 - Info\n\t5 - Transferir animal\n\t6 - Criar filho\n\t7 - Cancelar\n");
 		printf("Escolha: ");
 		scanf("%d", &res);
 		if(res == 1){
@@ -300,7 +334,15 @@ int menu(void){
 			if(res == 3) return -1;
 		}
 		if(res == 5) return 25;
-		if(res == 6) return -1;
+		if(res == 6){
+			printf("Criar Filho:\n\t1 - A partir de 1 animal\n\t2 - A partir de 2 animais\n\t3 - Cancelar\n");
+			printf("Escolha: ");
+			scanf("%d", &res);
+			if(res == 1) return 261;
+			if(res == 2) return 262;
+			if(res == 3) return -1;
+		}
+		if(res == 7) return -1;
 	}
 	return -1;
 }

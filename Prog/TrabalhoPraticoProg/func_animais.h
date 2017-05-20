@@ -1,5 +1,6 @@
 Animais * addAnimaisEnd(Animais *tAnimais, Areas *tAreas, int id, char *especie, char *nome, int peso, int locID, int filho) {
 	Animais *aux = tAnimais;
+	Animais *ani2 = tAnimais;
 	Areas *ta = tAreas;
 	Areas *move;
 
@@ -22,7 +23,19 @@ Animais * addAnimaisEnd(Animais *tAnimais, Areas *tAreas, int id, char *especie,
 		}
 	}
 	aux->prox->filho.filhoID = filho;
-	aux->prox->filho.strt = NULL;
+	if(filho != -1){
+		while (ani2->prox != NULL) {
+			ani2 = ani2->prox;
+			if(ani2->id == filho){
+				aux->prox->filho.strt = ani2;
+				break;
+			}else{
+				aux->prox->filho.strt = NULL;
+			}
+		}
+	} else {
+		aux->prox->filho.strt = NULL;
+	}
 	aux->prox->prox = NULL;
 	return tAnimais;
 }
@@ -347,6 +360,7 @@ void saveAnimais(Animais *tAnimais){
 	f = fopen("animais.dat", "wb+");
 	if(f==NULL){
 		printf("Erro a abrir ficheiro de Animais!\n");
+		return;
 	}
 	printf("A guardar Animais para ficheiro...\n");
 	while(temp->prox != NULL){
@@ -368,4 +382,114 @@ int getLastAnimalID(Animais *tAnimais){
 		}
 	}
 	return 0;
+}
+
+void linkAnimais(Animais *tAnimais, Areas *tAreas){
+	Animais *ani = tAnimais;
+	Animais *anit;
+	Areas *aret;
+
+	while(ani->prox != NULL){
+		ani = ani->prox;
+		anit = tAnimais;
+		aret = tAreas;
+		while(anit->prox != NULL){
+			anit = anit->prox;
+			if(anit->id == ani->filho.filhoID){
+				ani->filho.strt = anit;
+			}
+		}
+		while(aret->prox != NULL){
+			aret = aret->prox;
+			if(aret->id == ani->loc.id){
+				ani->loc.area = aret;
+			}
+		}
+	}
+}
+
+void criaFilho1(Animais *tAnimais, Areas *tAreas, int id, char *nome){
+	int tpeso=0;
+	Animais *temp = tAnimais;
+	Animais *anew;
+
+	while(temp->prox != NULL){
+		temp = temp->prox;
+		if(temp->id == id){
+			tpeso = temp->peso * 0.20;
+			temp->peso -= tpeso;
+			temp->loc.area->pesoAct -= tpeso;
+			anew = addAnimaisEnd(tAnimais, tAreas, getLastAnimalID(tAnimais)+1,temp->especie,nome,tpeso,temp->loc.area->id,-1);
+			while (anew->prox != NULL) {
+				anew = anew->prox;
+			}
+			temp->filho.filhoID = anew->id;
+			temp->filho.strt = anew;
+		}
+	}
+}
+
+bool verifyFilho2(Animais *tAnimais,int id1, int id2){
+	Animais *temp = tAnimais;
+	Animais *anew;
+
+	if(id1 == id2){
+		printf("nao podes escolher o mesmo animal!!\n");
+		return false;
+	}
+
+	while(temp->prox != NULL){
+		temp = temp->prox;
+		anew = tAnimais;
+		if(temp->id == id1){
+			while (anew->prox != NULL) {
+				anew = anew->prox;
+				if(anew->id == id2){
+					if(temp->loc.id == anew->loc.id){
+						if(strcmp(temp->especie,anew->especie) == 0){
+							return true;
+						}else{
+							printf("animais de especies diferentes!\n");
+							return false;
+						}
+					}else{
+						printf("of animais estao em areas diferentes!\n");
+						return false;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+void criaFilho2(Animais *tAnimais, Areas *tAreas, int id1, int id2, char *nome){
+	int tpeso=0;
+	Animais *temp = tAnimais;
+	Animais *temp2 = tAnimais;
+	Animais *anew;
+
+	while(temp->prox != NULL){
+		temp = temp->prox;
+		if(temp->id == id1){
+			while(temp2->prox != NULL){
+				temp2 = temp2->prox;
+				if(temp2->id == id2){
+					tpeso = temp->peso * 0.20; //animal 1
+					temp->peso -= temp->peso * 0.20; //animal 1
+					tpeso += temp2->peso * 0.20; //animal 2
+					temp2->peso -= temp2->peso * 0.20; //animal 2
+					temp->loc.area->pesoAct -= tpeso; //peso area on estao
+					anew = addAnimaisEnd(tAnimais, tAreas, getLastAnimalID(tAnimais)+1,temp->especie,nome,tpeso,temp->loc.area->id,-1);
+					while (anew->prox != NULL) {
+						anew = anew->prox;
+					}
+					temp->filho.filhoID = anew->id;
+					temp->filho.strt = anew;
+					temp2->filho.filhoID = anew->id;
+					temp2->filho.strt = anew;
+				}
+			}
+		}
+	}
 }
