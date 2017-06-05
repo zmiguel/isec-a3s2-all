@@ -1,25 +1,23 @@
-Areas * addAreaEnd(Areas *tAreas, int id, int tipo, int cap, int nr_front, int front1, int front2, int front3) {
-	Areas *aux = tAreas;
+Areas * addAreaEnd(Areas *tAreas, int id, int tipo, int cap, int nr_front, int front1, int front2, int front3, int nrAreas) {
+	//printf("(%d) sizeof tAreas: %d\n", nrAreas, (sizeof(Areas)*nrAreas));
+	tAreas = realloc(tAreas, (sizeof(Areas)*nrAreas));
 
-	while (aux->prox != NULL) {
-		aux = aux->prox;
-	}
-	aux->prox = malloc(sizeof(Areas));
-	aux->prox->id = id;
-	aux->prox->tipo = tipo;
-	aux->prox->cap = cap;
-	aux->prox->pesoAct = 0;
-	aux->prox->nr_front = nr_front;
-	aux->prox->front1.id = front1;
-	aux->prox->front2.id = front2;
-	aux->prox->front3.id = front3;
-	aux->prox->prox = NULL;
+	tAreas[id-1].id = id;
+	tAreas[id-1].tipo = tipo;
+	tAreas[id-1].cap = cap;
+	tAreas[id-1].pesoAct = 0;
+	tAreas[id-1].nr_front = nr_front;
+	tAreas[id-1].front1 = front1;
+	tAreas[id-1].front2 = front2;
+	tAreas[id-1].front3 = front3;
+
+	//printf("[ADD-AREA] %d %d %d %d %d %d %d\n", tAreas[id-1].id,tAreas[id-1].tipo,tAreas[id-1].cap,tAreas[id-1].nr_front,tAreas[id-1].front1,tAreas[id-1].front2,tAreas[id-1].front3);
+
 	return tAreas;
 }
 
-Areas * readAreas(Areas *tAreas){
+Areas * readAreas(Areas *tAreas, int *nrAreas){
 	int tID, tType, tCap, tNR, t1, t2, t3, i=0;
-	Areas *temp = tAreas;
 	FILE *f;
 	printf("A abrir ficheiro de Areas...\n");
 	f = fopen("areas.txt", "r");
@@ -30,17 +28,18 @@ Areas * readAreas(Areas *tAreas){
 	printf("A preencher vector...\n");
 	fscanf(f,"%d\t%d\t%d\t%d", &tID, &tType, &tCap, &tNR);
 	do{
+		*nrAreas = i+1;
 		if(tNR == 0){
-			temp = addAreaEnd(temp, tID, tType, tCap, tNR, -1, -1 , -1);
+			tAreas = addAreaEnd(tAreas, tID, tType, tCap, tNR, -1, -1 , -1, *nrAreas);
 		}else if(tNR == 1){
 			fscanf(f,"\t%d",&t1);
-			temp = addAreaEnd(temp, tID, tType, tCap, tNR, t1, -1 , -1);
+			tAreas = addAreaEnd(tAreas, tID, tType, tCap, tNR, t1, -1 , -1, *nrAreas);
 		}else if(tNR == 2){
 			fscanf(f,"\t%d\t%d",&t1, &t2);
-			temp = addAreaEnd(temp, tID, tType, tCap, tNR, t1, t2, -1);
+			tAreas = addAreaEnd(tAreas, tID, tType, tCap, tNR, t1, t2, -1, *nrAreas);
 		}else if(tNR == 3){
 			fscanf(f,"\t%d\t%d\t%d",&t1,&t2,&t3);
-			temp = addAreaEnd(temp, tID, tType, tCap, tNR, t1, t2, t3);
+			tAreas = addAreaEnd(tAreas, tID, tType, tCap, tNR, t1, t2, t3, *nrAreas);
 		}else{
 			exit(0);
 		}
@@ -49,205 +48,175 @@ Areas * readAreas(Areas *tAreas){
 	}while(!feof(f));
 	fclose(f);
 	printf("%d areas carregadas!!\n", i);
-	return temp;
+	return tAreas;
 }
 
-void dispArea(Areas *tArea){
-	Areas *temp = tArea;
-	printf("[AREAS]\n");
+void dispArea(Areas *tAreas, int nrAreas){
+	int i;
+	printf("[AREAS] (%d/%d)\n", sizeof(tAreas), nrAreas	);
 
-	while(temp->prox != NULL){
-		temp = temp->prox;
-		if(temp->nr_front == 0){
-			printf("[ID] (%d)   [Tipo] (%d)   [CAP] (%d/%d)\n", temp->id, temp->tipo, temp->pesoAct, temp->cap);
-		}else if(temp->nr_front == 1){
-			printf("[ID] (%d)   [Tipo] (%d)   [CAP] (%d/%d)   [F1] (%d)\n", temp->id, temp->tipo, temp->pesoAct, temp->cap, temp->front1.area->id);
-		}else if(temp->nr_front == 2){
-			printf("[ID] (%d)   [Tipo] (%d)   [CAP] (%d/%d)   [F1] (%d)   [F2] (%d)\n", temp->id, temp->tipo, temp->pesoAct, temp->cap, temp->front1.area->id, temp->front2.area->id);
-		}else if(temp->nr_front == 3){
-			printf("[ID] (%d)   [Tipo] (%d)   [CAP] (%d/%d)   [F1] (%d)   [F2] (%d)   [F3] (%d)\n", temp->id, temp->tipo, temp->pesoAct, temp->cap, temp->front1.area->id, temp->front2.area->id, temp->front3.area->id);
+	for(i=0;i<nrAreas;i++){
+		if(tAreas[i].nr_front == 0){
+			printf("[ID] (%d)   [Tipo] (%d)   [CAP] (%d/%d)\n", tAreas[i].id, tAreas[i].tipo, tAreas[i].pesoAct, tAreas[i].cap);
+		}else if(tAreas[i].nr_front == 1){
+			printf("[ID] (%d)   [Tipo] (%d)   [CAP] (%d/%d)   [F1] (%d)\n", tAreas[i].id, tAreas[i].tipo, tAreas[i].pesoAct, tAreas[i].cap, tAreas[i].front1);
+		}else if(tAreas[i].nr_front == 2){
+			printf("[ID] (%d)   [Tipo] (%d)   [CAP] (%d/%d)   [F1] (%d)   [F2] (%d)\n", tAreas[i].id, tAreas[i].tipo, tAreas[i].pesoAct, tAreas[i].cap, tAreas[i].front1, tAreas[i].front2);
+		}else if(tAreas[i].nr_front == 3){
+			printf("[ID] (%d)   [Tipo] (%d)   [CAP] (%d/%d)   [F1] (%d)   [F2] (%d)   [F3] (%d)\n", tAreas[i].id, tAreas[i].tipo, tAreas[i].pesoAct, tAreas[i].cap, tAreas[i].front1, tAreas[i].front2, tAreas[i].front3);
 		}
 	}
 }
 
-void saveAreas(Areas *tAreas){
-	Areas *temp = tAreas;
+void saveAreas(Areas *tAreas, int nrAreas){
 	FILE *f;
+    int i;
 	printf("A abrir ficheiro de Areas...\n");
 	f = fopen("areas.txt", "w+");
 	if(f==NULL){
 		printf("Erro a abrir ficheiro de areas!\n");
 	}
 	printf("A guardar Areas para ficheiro...\n");
-	while(temp->prox != NULL){
-		temp = temp->prox;
-		if(temp->nr_front == 0){
-			fprintf(f,"%d\t%d\t%d\t%d\n", temp->id, temp->tipo, temp->cap, temp->nr_front);
-		}else if(temp->nr_front == 1){
-			fprintf(f,"%d\t%d\t%d\t%d\t%d\n", temp->id, temp->tipo, temp->cap, temp->nr_front, temp->front1.id);
-		}else if(temp->nr_front == 2){
-			fprintf(f,"%d\t%d\t%d\t%d\t%d\t%d\n", temp->id, temp->tipo, temp->cap, temp->nr_front, temp->front1.id, temp->front2.id);
-		}else if(temp->nr_front == 3){
-			fprintf(f,"%d\t%d\t%d\t%d\t%d\t%d\t%d\n", temp->id, temp->tipo, temp->cap, temp->nr_front, temp->front1.id, temp->front2.id, temp->front3.id);
-		}
 
-	}
+    for(i=0;i<nrAreas;i++){
+        if(tAreas[i].nr_front == 0){
+            fprintf(f,"%d\t%d\t%d\t%d\n", tAreas[i].id, tAreas[i].tipo, tAreas[i].cap, tAreas[i].nr_front);
+        }else if(tAreas[i].nr_front == 1){
+            fprintf(f,"%d\t%d\t%d\t%d\t%d\n", tAreas[i].id, tAreas[i].tipo, tAreas[i].cap, tAreas[i].nr_front, tAreas[i].front1);
+        }else if(tAreas[i].nr_front == 2){
+            fprintf(f,"%d\t%d\t%d\t%d\t%d\t%d\n", tAreas[i].id, tAreas[i].tipo, tAreas[i].cap, tAreas[i].nr_front, tAreas[i].front1, tAreas[i].front2);
+        }else if(tAreas[i].nr_front == 3){
+            fprintf(f,"%d\t%d\t%d\t%d\t%d\t%d\t%d\n", tAreas[i].id, tAreas[i].tipo, tAreas[i].cap, tAreas[i].nr_front, tAreas[i].front1, tAreas[i].front2, tAreas[i].front3);
+        }
+    }
+
 	fclose(f);
 	printf("areas guardadas!!\n");
 }
 
-int nrFront(Areas *tArea, int id){
-	Areas *temp = tArea;
+int nrFront(Areas *tAreas, int id, int nrAreas){
+    int i;
+    for(i=0;i<nrAreas;i++){
+        if(tAreas[i].id == id){
+            return tAreas[i].nr_front;
+        }
+    }
 
-	do{
-		temp = temp->prox;
-		if(temp == NULL) return -1;
-	}while(temp->id != id);
-
-	return temp->nr_front;
+	return -1;
 }
 
-Areas * addFronteira(Areas *tAreas, int exist, int novo){
-	Areas *temp = tAreas;
+Areas * addFronteira(Areas *tAreas, int exist, int novo, int nrAreas){
+    int i;
 	printf("A adicionar nova fronteira a area existente\n");
-	while(temp->prox != NULL){
-		temp = temp->prox;
-		if(temp->id == exist){
-			if(temp->nr_front == 1){
-				temp->nr_front++;
-				temp->front2.id=novo;
-			}else if(temp->nr_front == 2){
-				temp->nr_front++;
-				temp->front3.id=novo;
-			}
-		}
-	}
+
+    for(i=0;i<nrAreas;i++){
+        if(tAreas[i].id == exist){
+            if(tAreas[i].nr_front == 1){
+                tAreas[i].nr_front++;
+                tAreas[i].front2=novo;
+            }else if(tAreas[i].nr_front == 2){
+                tAreas[i].nr_front++;
+                tAreas[i].front3=novo;
+            }
+        }
+    }
 	printf("Area existente actualizada!\n");
 	return tAreas;
 }
 
-int pesoActArea(Areas *tArea, int id){
-	Areas *temp = tArea;
+int pesoActArea(Areas *tAreas, int id, int nrAreas){
+	int i;
 
-	do{
-		temp = temp->prox;
-		if(temp == NULL) return -1;
-	}while(temp->id != id);
-
-	return temp->pesoAct;
+    for(i=0;i<nrAreas;i++){
+        if(tAreas[i].id == id){
+			return tAreas[i].pesoAct;
+        }
+    }
+	return -1;
 }
 
-int capArea(Areas *tArea, int id){
-	Areas *temp = tArea;
+int capArea(Areas *tAreas, int id, int nrAreas){
+	int i;
 
-	do{
-		temp = temp->prox;
-		if(temp == NULL) return -1;
-	}while(temp->id != id);
-
-	return temp->cap;
-}
-
-Areas * rmArea(Areas *tAreas, int id){
-	Areas *temp = tAreas;
-	while(temp->prox != NULL){
-		temp = temp->prox;
-		if(temp->id == id){
-			tAreas = temp->prox;
-			printf("Area removida!\n");
-			return tAreas;
+	for(i=0;i<nrAreas;i++){
+		if(tAreas[i].id == id){
+			return tAreas[i].cap;
 		}
-		if(temp->prox->id == id){
-			if(temp->prox->pesoAct != 0){
+	}
+
+	return -1;
+}
+
+Areas * rmArea(Areas *tAreas, int id, int nrAreas){
+	Areas *temp = malloc((sizeof(Areas)*(nrAreas-1)));
+	int i, i2=0, i3=0;
+
+	for(i=0;i<nrAreas;i++){
+		if(tAreas[i].id == id){
+			if(tAreas[i].pesoAct != 0){
 				printf("area ainda tem animais!\n");
+				return tAreas;
 			}else{
-				if(temp->prox->prox == NULL){
-					temp->prox = NULL;
-					printf("Area removida!\n");
-					return tAreas;
-				}else{
-					temp->prox = temp->prox->prox;
-					printf("Area removida!\n");
-					return tAreas;
+				for(i2=0;i2<nrAreas;i2++){
+					if(tAreas[i2].id != id){
+						temp[i2].id = tAreas[i3].id;
+						temp[i2].tipo = tAreas[i3].tipo;
+						temp[i2].cap = tAreas[i3].cap;
+						temp[i2].pesoAct = tAreas[i3].pesoAct;
+						temp[i2].nr_front = tAreas[i3].nr_front;
+						temp[i2].front1 = tAreas[i3].front1;
+						temp[i2].front2 = tAreas[i3].front2;
+						temp[i2].front3 = tAreas[i3].front3;
+					}else{
+						i3++;
+					}
+					i3++;
 				}
-				break;
+				return temp;
+			}
+		}
+	}
+	printf("Area nao encontrada!!!\n");
+	return tAreas;
+}
+
+Areas * rmFronteira(Areas *tAreas, int id, int nrAreas){
+	int i;
+
+	for(i=0;i<nrAreas;i++){
+		if(tAreas[i].nr_front==1){
+			if(tAreas[i].front1==id){
+				tAreas[i].nr_front=0;
+				tAreas[i].front1=-1;
+			}
+		}else if(tAreas[i].nr_front==2){
+			if(tAreas[i].front1==id){
+				tAreas[i].nr_front--;
+				tAreas[i].front1 = tAreas[i].front2;
+				tAreas[i].front2=-1;
+			}else if(tAreas[i].front2==id){
+				tAreas[i].nr_front--;
+				tAreas[i].front2=-1;
+			}
+		}else if(tAreas[i].nr_front==3){
+			if(tAreas[i].front1==id){
+				tAreas[i].nr_front--;
+				tAreas[i].front1 = tAreas[i].front2;
+				tAreas[i].front2 = tAreas[i].front3;
+				tAreas[i].front3=-1;
+			}else if(tAreas[i].front2==id){
+				tAreas[i].nr_front--;
+				tAreas[i].front2 = tAreas[i].front3;
+				tAreas[i].front3=-1;
+			}else if(tAreas[i].front3==id){
+				tAreas[i].nr_front--;
+				tAreas[i].front3=-1;
 			}
 		}
 	}
 	return tAreas;
 }
 
-Areas * rmFronteira(Areas *tAreas, int id){
-	Areas *temp = tAreas;
-	while(temp->prox != NULL){
-		temp = temp->prox;
-		if(temp->nr_front==1){
-			if(temp->front1.id==id){
-				temp->nr_front=0;
-				temp->front1.id=-1;
-			}
-		}else if(temp->nr_front==2){
-			if(temp->front1.id==id){
-				temp->nr_front--;
-				temp->front1.id = temp->front2.id;
-				temp->front2.id=-1;
-			}else if(temp->front2.id==id){
-				temp->nr_front--;
-				temp->front2.id=-1;
-			}
-		}else if(temp->nr_front==3){
-			if(temp->front1.id==id){
-				temp->nr_front--;
-				temp->front1.id = temp->front2.id;
-				temp->front2.id = temp->front3.id;
-				temp->front3.id=-1;
-			}else if(temp->front2.id==id){
-				temp->nr_front--;
-				temp->front2.id = temp->front3.id;
-				temp->front3.id=-1;
-			}else if(temp->front3.id==id){
-				temp->nr_front--;
-				temp->front3.id=-1;
-			}
-		}
-	}
-	return tAreas;
-}
-
-int getLastAreaID(Areas *tAreas){
-	Areas *temp = tAreas;
-	while(temp->prox != NULL){
-		temp = temp->prox;
-		if(temp->prox == NULL){
-			return temp->id;
-		}
-	}
-	return 0;
-}
-
-Areas * linkAreas(Areas *tAreas){
-	Areas *temp = tAreas;
-	Areas *temp2 = tAreas;
-	Areas *move;
-	while(temp->prox != NULL){
-		temp = temp->prox;
-		temp2 = tAreas;
-		while(temp2->prox != NULL){
-			move = malloc(sizeof(Areas));
-			temp2 = temp2->prox;
-			if(temp2->id == temp->front1.id){
-				move = temp2;
-				temp->front1.area = move;
-			}
-			if(temp2->id == temp->front2.id){
-				move = temp2;
-				temp->front2.area = move;
-			}
-			if(temp2->id == temp->front3.id){
-				move = temp2;
-				temp->front3.area = move;
-			}
-		}
-	}
-	return tAreas;
+int getLastAreaID(Areas *tAreas, int nrAreas){
+	return tAreas[nrAreas-1].id;
 }

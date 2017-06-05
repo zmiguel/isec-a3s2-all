@@ -1,27 +1,23 @@
-Animais * addAnimaisEnd(Animais *tAnimais, Areas *tAreas, int id, char *especie, char *nome, int peso, int locID, int filho) {
+Animais * addAnimaisEnd(Animais *tAnimais, Areas *tAreas, int id, char *especie, char *nome, int peso, int locID, int filho, int nrAreas) {
 	Animais *aux = tAnimais;
 	Animais *ani2 = tAnimais;
-	Areas *ta = tAreas;
-	Areas *move;
+	int i;
 
 	while (aux->prox != NULL) {
 		aux = aux->prox;
 	}
+
+	for(i=0;i<nrAreas;i++){
+		if(tAreas[i].id == locID) break;
+	}
+
 	aux->prox = malloc(sizeof(Animais));
 	aux->prox->id = id;
 	strcpy(aux->prox->especie, especie);
 	strcpy(aux->prox->nome, nome);
 	aux->prox->peso = peso;
-	aux->prox->loc.id = locID;
-	while(ta->prox != NULL){
-		move = malloc(sizeof(Areas));
-		ta = ta->prox;
-		if(ta->id == locID){
-			aux->prox->loc.area = ta;
-			ta->pesoAct += peso;
-			break;
-		}
-	}
+	tAreas[i].pesoAct += peso;
+	aux->prox->loc = locID;
 	aux->prox->filho.filhoID = filho;
 	if(filho != -1){
 		while (ani2->prox != NULL) {
@@ -40,11 +36,11 @@ Animais * addAnimaisEnd(Animais *tAnimais, Areas *tAreas, int id, char *especie,
 	return tAnimais;
 }
 
-Animais * readAnimais(Animais *tAnimais, Areas *tAreas){
+Animais * readAnimais(Animais *tAnimais, Areas *tAreas, int nrAreas){
 	Animais *temp = tAnimais;
-	Areas *ta = tAreas;
 	Animais *read;
 	FILE *f;
+	int i, i2;
 	unsigned long end;
 	printf("A procurar ficheiro de Animais...\n");
 	f = fopen("animais.dat","rb");
@@ -55,49 +51,58 @@ Animais * readAnimais(Animais *tAnimais, Areas *tAreas){
 	}
 	printf("Ficheiro de animais encontrado e aberto!\n");
 	while(!feof(f)){
-		ta = tAreas;
 		read = malloc(sizeof(Animais));
 		end = fread(read,sizeof(Animais),1,f);
 		if(end!=1) break;
-		while(ta->prox != NULL){
-			ta = ta->prox;
-			if(ta->id == read->loc.id){
-				if((ta->pesoAct + read->peso) > ta->cap){//area ia ficar com peso a mais!
-					if(ta->front1.area){
-						if((ta->front1.area->pesoAct + read->peso) <= ta->front1.area->cap){
-							ta->front1.area->pesoAct += read->peso;
-							read->loc.id = ta->front1.area->id;
-							read->loc.area = ta->front1.area;
-							temp->prox = read;
-							temp = temp->prox;
-							break;
+		for(i=0;i<nrAreas;i++){
+			if(tAreas[i].id == read->loc){
+				if((tAreas[i].pesoAct + read->peso) > tAreas[i].cap){//area ia ficar com peso a mais!
+					if(tAreas[i].nr_front == 1){
+						for(i2=0;i2<nrAreas;i2++){
+							if(tAreas[i2].id == tAreas[i].front1){
+								if((tAreas[i2].pesoAct + read->peso) <= tAreas[i2].cap){
+									tAreas[i2].pesoAct += read->peso;
+									read->loc = tAreas[i2].front1;
+									temp->prox = read;
+									temp = temp->prox;
+									fclose(f);
+									return tAnimais;
+								}
+							}
 						}
 					}
-					if(ta->front2.area){
-						if((ta->front2.area->pesoAct + read->peso) <= ta->front2.area->cap){
-							ta->front2.area->pesoAct += read->peso;
-							read->loc.id = ta->front2.area->id;
-                            read->loc.area = ta->front2.area;
-							temp->prox = read;
-                            temp = temp->prox;
-							break;
+					if(tAreas[i].nr_front == 2){
+						for(i2=0;i2<nrAreas;i2++){
+							if(tAreas[i2].id == tAreas[i].front2){
+								if((tAreas[i2].pesoAct + read->peso) <= tAreas[i2].cap){
+									tAreas[i2].pesoAct += read->peso;
+									read->loc = tAreas[i2].front2;
+									temp->prox = read;
+									temp = temp->prox;
+									fclose(f);
+									return tAnimais;
+								}
+							}
 						}
 					}
-					if(ta->front3.area){
-						if((ta->front3.area->pesoAct + read->peso) <= ta->front3.area->cap){
-							ta->front3.area->pesoAct += read->peso;
-							read->loc.id = ta->front3.area->id;
-                            read->loc.area = ta->front3.area;
-							temp->prox = read;
-                            temp = temp->prox;
-							break;
+					if(tAreas[i].nr_front == 3){
+						for(i2=0;i2<nrAreas;i2++){
+							if(tAreas[i2].id == tAreas[i].front3){
+								if((tAreas[i2].pesoAct + read->peso) <= tAreas[i2].cap){
+									tAreas[i2].pesoAct += read->peso;
+									read->loc = tAreas[i2].front3;
+									temp->prox = read;
+									temp = temp->prox;
+									fclose(f);
+									return tAnimais;
+								}
+							}
 						}
 					}
 				}else{//area tem capacidade para ter o animal
-					ta->pesoAct += read->peso;
-                    read->loc.area = ta;
+					tAreas[i].pesoAct += read->peso;
 					temp->prox = read;
-                    temp = temp->prox;
+					temp = temp->prox;
 					break;
 				}
 			}
@@ -107,7 +112,7 @@ Animais * readAnimais(Animais *tAnimais, Areas *tAreas){
 	return tAnimais;
 }
 
-Animais * importAnimaisFile(Animais *tAnimais, char *nfile, Areas *tAreas){
+Animais * importAnimaisFile(Animais *tAnimais, char *nfile, Areas *tAreas, int nrAreas){
 	Animais *temp = tAnimais;
 	Areas *ta = tAreas;
 	int last_id = getLastAnimalID(tAnimais), loc, peso;
@@ -125,9 +130,9 @@ Animais * importAnimaisFile(Animais *tAnimais, char *nfile, Areas *tAreas){
 		if(fscanf(f,"%s\t%s\t%d\t%d", especie, nome, &peso, &loc) < 0){
 			break;
 		}
-		if((pesoActArea(ta,loc) + peso) <= capArea(ta, loc)){
+		if((pesoActArea(ta,loc,nrAreas) + peso) <= capArea(ta, loc, nrAreas)){
 			last_id++;
-			temp = addAnimaisEnd(temp, ta, last_id, especie, nome, peso, loc, -1);
+			temp = addAnimaisEnd(temp, ta, last_id, especie, nome, peso, loc, -1, nrAreas);
 		}
 
 	}
@@ -142,28 +147,27 @@ void dispAnimais(Animais *tAnimais){
 	while(temp->prox != NULL){
 		temp = temp->prox;
 		if(temp->filho.strt){
-			printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO](%d-%s)\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc.area->id, temp->filho.strt->id, temp->filho.strt->nome);
+			printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO](%d-%s)\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc, temp->filho.strt->id, temp->filho.strt->nome);
 		}
 		if(!temp->filho.strt){
-			printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO]()\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc.area->id);
+			printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO]()\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
 		}
 	}
 }
 
-void dispAnimaisArea(Animais *tAnimais, Areas *tAreas, int id){
+void dispAnimaisArea(Animais *tAnimais, Areas *tAreas, int id, int nrAreas){
 	Animais *temp = tAnimais;
-	Areas *ta = tAreas;
+	int i;
 	printf("\n[ANIMAIS NA AREA %d]\n", id);
-	while(ta->prox != NULL){
-		ta = ta->prox;
-		if(ta->id == id){
+	for(i=0;i<nrAreas;i++){
+		if(tAreas[i].id == id){
 			while(temp->prox != NULL){
 				temp = temp->prox;
 				if(temp->filho.strt){
-					printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO](%d-%s)\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc.area->id, temp->filho.strt->id, temp->filho.strt->nome);
+					printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO](%d-%s)\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc, temp->filho.strt->id, temp->filho.strt->nome);
 				}
 				if(!temp->filho.strt){
-					printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO]()\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc.area->id);
+					printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO]()\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
 				}
 			}
 		}
@@ -177,10 +181,10 @@ void dispAnimaisEspecie(Animais *tAnimais, char *especie){
 		temp = temp->prox;
 		if(strcmp(temp->especie,especie)==0){
 			if(temp->filho.strt){
-				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO](%d-%s)\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc.area->id, temp->filho.strt->id, temp->filho.strt->nome);
+				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO](%d-%s)\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc, temp->filho.strt->id, temp->filho.strt->nome);
 			}
 			if(!temp->filho.strt){
-				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO]()\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc.area->id);
+				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO]()\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
 			}
 		}
 	}
@@ -193,10 +197,10 @@ void dispAnimalID(Animais *tAnimais, int id){
 		temp = temp->prox;
 		if(temp->id == id){
 			if(temp->filho.strt){
-				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO](%d-%s)\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc.area->id, temp->filho.strt->id, temp->filho.strt->nome);
+				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO](%d-%s)\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc, temp->filho.strt->id, temp->filho.strt->nome);
 			}
 			if(!temp->filho.strt){
-				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO]()\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc.area->id);
+				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO]()\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
 			}
 		}
 	}
@@ -209,23 +213,28 @@ void dispAnimalNome(Animais *tAnimais, char *nome){
 		temp = temp->prox;
 		if(strcmp(temp->nome,nome)==0){
 			if(temp->filho.strt){
-				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO](%d-%s)\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc.area->id, temp->filho.strt->id, temp->filho.strt->nome);
+				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO](%d-%s)\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc, temp->filho.strt->id, temp->filho.strt->nome);
 			}
 			if(!temp->filho.strt){
-				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO]()\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc.area->id);
+				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO]()\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
 			}
 		}
 	}
 }
 
-void rmAnimalID(Animais *tAnimais, Areas *tAreas, int id){
+void rmAnimalID(Animais *tAnimais, Areas *tAreas, int id, int nrAreas){
 	Animais *temp = tAnimais;
 	Animais *ani = malloc(sizeof(Animais));
+	int i;
 
 	while(temp->prox != NULL){
 		temp = temp->prox;
 		if(temp->id == id){
-			temp->loc.area->pesoAct -= temp->peso;
+			for(i=0;i<nrAreas;i++){
+				if(tAreas[i].id == temp->loc){
+					tAreas[i].pesoAct -= temp->peso;
+				}
+			}
 			tAnimais = temp->prox;
 			printf("Animal removido!\n");
 			ani = tAnimais;
@@ -239,7 +248,11 @@ void rmAnimalID(Animais *tAnimais, Areas *tAreas, int id){
 			return;
 		}
 		if(temp->prox->id == id){
-			temp->prox->loc.area->pesoAct -= temp->prox->peso;
+			for(i=0;i<nrAreas;i++){
+				if(tAreas[i].id == temp->prox->loc){
+					tAreas[i].pesoAct -= temp->prox->peso;
+				}
+			}
 			temp->prox = temp->prox->prox;
 			printf("Animal removido!\n");
 			ani = tAnimais;
@@ -257,14 +270,19 @@ void rmAnimalID(Animais *tAnimais, Areas *tAreas, int id){
 	return;
 }
 
-void rmAnimalNome(Animais *tAnimais, Areas *tAreas, char *nome){
+void rmAnimalNome(Animais *tAnimais, Areas *tAreas, char *nome, int nrAreas){
 	Animais *temp = tAnimais;
 	Animais *ani = malloc(sizeof(Animais));
+	int i;
 
 	while(temp->prox != NULL){
 		temp = temp->prox;
 		if(strcmp(temp->nome,nome)==0){
-			temp->loc.area->pesoAct -= temp->peso;
+			for(i=0;i<nrAreas;i++){
+				if(tAreas[i].id == temp->loc){
+					tAreas[i].pesoAct -= temp->peso;
+				}
+			}
 			tAnimais = temp->prox;
 			printf("Animal removido!\n");
 			ani = tAnimais;
@@ -278,7 +296,11 @@ void rmAnimalNome(Animais *tAnimais, Areas *tAreas, char *nome){
 			return;
 		}
 		if(strcmp(temp->prox->nome,nome)==0){
-			temp->prox->loc.area->pesoAct -= temp->prox->peso;
+			for(i=0;i<nrAreas;i++){
+				if(tAreas[i].id == temp->prox->loc){
+					tAreas[i].pesoAct -= temp->prox->peso;
+				}
+			}
 			temp->prox = temp->prox->prox;
 			printf("Animal removido!\n");
 			ani = tAnimais;
@@ -296,51 +318,61 @@ void rmAnimalNome(Animais *tAnimais, Areas *tAreas, char *nome){
 	return;
 }
 
-void transfAnimal(Animais *tAnimais, Areas *tAreas, int id, int desto){
+void transfAnimal(Animais *tAnimais, Areas *tAreas, int id, int desto, int nrAreas){
 	Animais *temp = tAnimais;
-	Areas *ta = tAreas;
+	int i/*destino*/, i2/*actual*/;
 
 	while(temp->prox != NULL){
 		temp = temp->prox;
 		if(temp->id == id){
-			while(ta->prox != NULL){
-				ta = ta->prox;
-				if(ta->id == desto){
-					if(ta->front1.area && ta->front1.area->id == temp->loc.area->id){
-						if((ta->front1.area->pesoAct + temp->peso) <= ta->front1.area->cap){
-							temp->loc.area->pesoAct -= temp->peso;
-							ta->pesoAct += temp->peso;
-							temp->loc.area = ta;
-							temp->loc.id = ta->id;
-							printf("Animal transferido!! [%d/%d/%d]\n", temp->id, temp->loc.id, temp->loc.area->id);
-							return;
-						}else{
-							printf("Area destino nao tem capacidade para receber o animal!!\n");
-							return;
+			for(i=0;i<nrAreas;i++){
+				if(tAreas[i].id == desto){//procura area com ID do destino
+					if(tAreas[i].front1 == temp->loc){ // verifica se a localizaçao actual faz fronteira com a area destino
+						for(i2=0;i2<nrAreas;i2++){
+							if(tAreas[i2].id == tAreas[i].front1){//encontra a area actual do animal
+								if((tAreas[i].pesoAct + temp->peso) <= tAreas[i].cap){//verifica se o destino tem capacidade para ter o animal
+									tAreas[i2].pesoAct -= temp->peso;
+									tAreas[i].pesoAct += temp->peso;
+									temp->loc = tAreas[i].id;
+									printf("Animal transferido!! [%d/%d/%d]\n", temp->id, temp->loc, temp->loc);
+									return;
+								}else{
+									printf("Area destino nao tem capacidade para receber o animal!!\n");
+									return;
+								}
+							}
 						}
-					}else if(ta->front2.area && ta->front2.area->id == temp->loc.area->id){
-						if((ta->front2.area->pesoAct + temp->peso) <= ta->front2.area->cap){
-							temp->loc.area->pesoAct -= temp->peso;
-							ta->pesoAct += temp->peso;
-							temp->loc.area = ta;
-							temp->loc.id = ta->id;
-							printf("Animal transferido!! [%d/%d/%d]\n", temp->id, temp->loc.id, temp->loc.area->id);
-							return;
-						}else{
-							printf("Area destino nao tem capacidade para receber o animal!!\n");
-							return;
+					}
+					if(tAreas[i].front2 == temp->loc){// verifica se a localizaçao actual faz fronteira com a area destino
+						for(i2=0;i2<nrAreas;i2++){
+							if(tAreas[i2].id == tAreas[i].front2){//encontra a area actual do animal
+								if((tAreas[i].pesoAct + temp->peso) <= tAreas[i].cap){//verifica se o destino tem capacidade para ter o animal
+									tAreas[i2].pesoAct -= temp->peso;
+									tAreas[i].pesoAct += temp->peso;
+									temp->loc = tAreas[i].id;
+									printf("Animal transferido!! [%d/%d/%d]\n", temp->id, temp->loc, temp->loc);
+									return;
+								}else{
+									printf("Area destino nao tem capacidade para receber o animal!!\n");
+									return;
+								}
+							}
 						}
-					}else if(ta->front3.area && ta->front3.area->id == temp->loc.area->id){
-						if((ta->front3.area->pesoAct + temp->peso) <= ta->front3.area->cap){
-							temp->loc.area->pesoAct -= temp->peso;
-							ta->pesoAct += temp->peso;
-							temp->loc.area = ta;
-							temp->loc.id = ta->id;
-							printf("Animal transferido!! [%d/%d/%d]\n", temp->id, temp->loc.id, temp->loc.area->id);
-							return;
-						}else{
-							printf("Area destino nao tem capacidade para receber o animal!!\n");
-							return;
+					}
+					if(tAreas[i].front3 == temp->loc){// verifica se a localizaçao actual faz fronteira com a area destino
+						for(i2=0;i2<nrAreas;i2++){
+							if(tAreas[i2].id == tAreas[i].front3){//encontra a area actual do animal
+								if((tAreas[i].pesoAct + temp->peso) <= tAreas[i].cap){//verifica se o destino tem capacidade para ter o animal
+									tAreas[i2].pesoAct -= temp->peso;
+									tAreas[i].pesoAct += temp->peso;
+									temp->loc = tAreas[i].id;
+									printf("Animal transferido!! [%d/%d/%d]\n", temp->id, temp->loc, temp->loc);
+									return;
+								}else{
+									printf("Area destino nao tem capacidade para receber o animal!!\n");
+									return;
+								}
+							}
 						}
 					}else{
 						printf("Area destino nao faz fronteira com a area em que o animal esta!!\n");
@@ -351,6 +383,7 @@ void transfAnimal(Animais *tAnimais, Areas *tAreas, int id, int desto){
 		}
 	}
 	printf("alguma coisa correu mal...\n");
+	return;
 }
 
 void saveAnimais(Animais *tAnimais){
@@ -384,42 +417,38 @@ int getLastAnimalID(Animais *tAnimais){
 	return 0;
 }
 
-void linkAnimais(Animais *tAnimais, Areas *tAreas){
+void linkAnimais(Animais *tAnimais){
 	Animais *ani = tAnimais;
 	Animais *anit;
-	Areas *aret;
 
 	while(ani->prox != NULL){
 		ani = ani->prox;
 		anit = tAnimais;
-		aret = tAreas;
 		while(anit->prox != NULL){
 			anit = anit->prox;
 			if(anit->id == ani->filho.filhoID){
 				ani->filho.strt = anit;
 			}
 		}
-		while(aret->prox != NULL){
-			aret = aret->prox;
-			if(aret->id == ani->loc.id){
-				ani->loc.area = aret;
-			}
-		}
 	}
 }
 
-void criaFilho1(Animais *tAnimais, Areas *tAreas, int id, char *nome){
-	int tpeso=0;
+void criaFilho1(Animais *tAnimais, Areas *tAreas, int id, char *nome, int nrAreas){
+	int tpeso=0, i;
 	Animais *temp = tAnimais;
 	Animais *anew;
+
+	for(i=0;i<nrAreas;i++){
+		if(tAreas[i].id == id) break;
+	}
 
 	while(temp->prox != NULL){
 		temp = temp->prox;
 		if(temp->id == id){
 			tpeso = temp->peso * 0.20;
 			temp->peso -= tpeso;
-			temp->loc.area->pesoAct -= tpeso;
-			anew = addAnimaisEnd(tAnimais, tAreas, getLastAnimalID(tAnimais)+1,temp->especie,nome,tpeso,temp->loc.area->id,-1);
+			tAreas[i].pesoAct -= tpeso;
+			anew = addAnimaisEnd(tAnimais, tAreas, getLastAnimalID(tAnimais)+1,temp->especie,nome,tpeso,temp->loc,-1, nrAreas);
 			while (anew->prox != NULL) {
 				anew = anew->prox;
 			}
@@ -445,7 +474,7 @@ bool verifyFilho2(Animais *tAnimais,int id1, int id2){
 			while (anew->prox != NULL) {
 				anew = anew->prox;
 				if(anew->id == id2){
-					if(temp->loc.id == anew->loc.id){
+					if(temp->loc == anew->loc){
 						if(strcmp(temp->especie,anew->especie) == 0){
 							return true;
 						}else{
@@ -463,11 +492,15 @@ bool verifyFilho2(Animais *tAnimais,int id1, int id2){
 	return false;
 }
 
-void criaFilho2(Animais *tAnimais, Areas *tAreas, int id1, int id2, char *nome){
-	int tpeso=0;
+void criaFilho2(Animais *tAnimais, Areas *tAreas, int id1, int id2, char *nome, int nrAreas){
+	int tpeso=0, i;
 	Animais *temp = tAnimais;
 	Animais *temp2 = tAnimais;
 	Animais *anew;
+
+	for(i=0;i<nrAreas;i++){
+		if(tAreas[i].id == id1) break;
+	}
 
 	while(temp->prox != NULL){
 		temp = temp->prox;
@@ -479,8 +512,8 @@ void criaFilho2(Animais *tAnimais, Areas *tAreas, int id1, int id2, char *nome){
 					temp->peso -= temp->peso * 0.20; //animal 1
 					tpeso += temp2->peso * 0.20; //animal 2
 					temp2->peso -= temp2->peso * 0.20; //animal 2
-					temp->loc.area->pesoAct -= tpeso; //peso area on estao
-					anew = addAnimaisEnd(tAnimais, tAreas, getLastAnimalID(tAnimais)+1,temp->especie,nome,tpeso,temp->loc.area->id,-1);
+					tAreas[i].pesoAct -= tpeso; //peso area on estao
+					anew = addAnimaisEnd(tAnimais, tAreas, getLastAnimalID(tAnimais)+1,temp->especie,nome,tpeso,temp->loc,-1, nrAreas);
 					while (anew->prox != NULL) {
 						anew = anew->prox;
 					}

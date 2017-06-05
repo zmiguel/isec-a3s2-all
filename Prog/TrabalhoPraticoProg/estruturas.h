@@ -1,8 +1,3 @@
-struct area{
-  int id;
-  struct area_st *area;
-};
-
 struct animal_s{
 	int filhoID;
 	struct animais_st *strt;
@@ -15,11 +10,9 @@ typedef struct area_st{
   int pesoAct;
   //fronteiras
   int nr_front;
-  struct area front1;
-  struct area front2;
-  struct area front3;
-  //next ID
-  struct area_st *prox;
+  int front1;
+  int front2;
+  int front3;
 }Areas;
 
 typedef struct animais_st{
@@ -27,7 +20,7 @@ typedef struct animais_st{
   char especie[100];
   char nome[100];
   int peso;
-  struct area loc;
+  int loc;
   //filho
   struct animal_s filho;
   //next ID
