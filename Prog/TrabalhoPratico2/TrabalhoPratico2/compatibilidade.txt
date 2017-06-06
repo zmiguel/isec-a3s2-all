@@ -1,0 +1,5 @@
+cao	gato
+gato	barata
+gato	peixe
+leao	zebra
+tigre	cao

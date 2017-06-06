@@ -101,7 +101,6 @@ int nrFront(Areas *tAreas, int id, int nrAreas){
             return tAreas[i].nr_front;
         }
     }
-
 	return -1;
 }
 

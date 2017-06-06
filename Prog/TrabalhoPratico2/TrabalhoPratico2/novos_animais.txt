@@ -1,0 +1,2 @@
+baleia	alface	500	2
+passaro	piu	2	6
