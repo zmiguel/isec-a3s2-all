@@ -17,7 +17,7 @@ int pesoActArea(Areas *tArea, char *id, int nrAreas);
 void criaFilho1(Animais *tAnimais, Areas *tAreas, int id, char *nome, int nrAreas);
 void criaFilho2(Animais *tAnimais, Areas *tAreas, int id1, int id2, char *nome, int nrAreas);
 void dispAnimais(Animais *tAnimais);
-void dispAnimaisArea(Animais *tAnimais, Areas *tAreas, char *id, int nrAreas);
+void dispAnimaisArea(Animais *tAnimais, char *id, int nrAreas);
 void dispAnimaisEspecie(Animais *tAnimais, char *especie);
 void dispAnimalID(Animais *tAnimais, int id);
 void dispAnimalNome(Animais *tAnimais, char *nome);
