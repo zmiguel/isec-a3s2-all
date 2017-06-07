@@ -1,4 +1,4 @@
-Animais * addAnimaisEnd(Animais *tAnimais, Areas *tAreas, int id, char *especie, char *nome, int peso, int locID, int filho, int nrAreas) {
+Animais * addAnimaisEnd(Animais *tAnimais, Areas *tAreas, int id, char *especie, char *nome, int peso, char *locID, int nrAreas) {
 	Animais *aux = tAnimais;
 	Animais *ani2 = tAnimais;
 	int i;
@@ -8,7 +8,7 @@ Animais * addAnimaisEnd(Animais *tAnimais, Areas *tAreas, int id, char *especie,
 	}
 
 	for(i=0;i<nrAreas;i++){
-		if(tAreas[i].id == locID) break;
+		if(strcmp(tAreas[i].id, locID)==0) break;
 	}
 
 	aux->prox = malloc(sizeof(Animais));
@@ -17,22 +17,13 @@ Animais * addAnimaisEnd(Animais *tAnimais, Areas *tAreas, int id, char *especie,
 	strcpy(aux->prox->nome, nome);
 	aux->prox->peso = peso;
 	tAreas[i].pesoAct += peso;
-	aux->prox->loc = locID;
-	aux->prox->filho.fID = filho;
-	if(filho != -1){
-		while (ani2->prox != NULL) {
-			ani2 = ani2->prox;
-			if(ani2->id == filho){
-				aux->prox->filho.strt = ani2;
-				break;
-			}else{
-				aux->prox->filho.strt = NULL;
-			}
-		}
-	} else {
-		aux->prox->filho.strt = NULL;
-		aux->prox->pais.strt = NULL;
-	}
+	strcpy(aux->prox->loc, locID);
+	aux->prox->filho.fnr = 0;
+	aux->prox->filho.strt = NULL;
+	aux->prox->pais.strt = NULL;
+	aux->prox->pais.fnr = 0;
+	aux->prox->pais.fID = -1;
+	aux->prox->pais.fID2 = -1;
 	aux->prox->prox = NULL;
 	return tAnimais;
 }
@@ -59,14 +50,14 @@ Animais * readAnimais(Animais *tAnimais, Areas *tAreas, int nrAreas, bool compAc
 			end = fread(read, sizeof(Animais), 1, f);
 			if (end != 1) break;
 			for (i = 0; i<nrAreas; i++) {
-				if (tAreas[i].id == read->loc) {
+				if (strcmp(tAreas[i].id, read->loc)==0) {
 					if ((tAreas[i].pesoAct + read->peso) > tAreas[i].cap) {//area ia ficar com peso a mais!
 						if (tAreas[i].nr_front == 1) {
 							for (i2 = 0; i2<nrAreas; i2++) {
-								if (tAreas[i2].id == tAreas[i].front1) {
+								if (strcmp(tAreas[i2].id, tAreas[i].front1)==0) {
 									if ((tAreas[i2].pesoAct + read->peso) <= tAreas[i2].cap) {
 										tAreas[i2].pesoAct += read->peso;
-										read->loc = tAreas[i2].front1;
+										strcpy(read->loc, tAreas[i2].front1);
 										temp->prox = read;
 										temp = temp->prox;
 										fclose(f);
@@ -77,10 +68,10 @@ Animais * readAnimais(Animais *tAnimais, Areas *tAreas, int nrAreas, bool compAc
 						}
 						if (tAreas[i].nr_front == 2) {
 							for (i2 = 0; i2<nrAreas; i2++) {
-								if (tAreas[i2].id == tAreas[i].front2) {
+								if (strcmp(tAreas[i2].id, tAreas[i].front2)==0) {
 									if ((tAreas[i2].pesoAct + read->peso) <= tAreas[i2].cap) {
 										tAreas[i2].pesoAct += read->peso;
-										read->loc = tAreas[i2].front2;
+										strcpy(read->loc, tAreas[i2].front2);
 										temp->prox = read;
 										temp = temp->prox;
 										fclose(f);
@@ -91,10 +82,10 @@ Animais * readAnimais(Animais *tAnimais, Areas *tAreas, int nrAreas, bool compAc
 						}
 						if (tAreas[i].nr_front == 3) {
 							for (i2 = 0; i2<nrAreas; i2++) {
-								if (tAreas[i2].id == tAreas[i].front3) {
+								if (strcmp(tAreas[i2].id, tAreas[i].front3)==0) {
 									if ((tAreas[i2].pesoAct + read->peso) <= tAreas[i2].cap) {
 										tAreas[i2].pesoAct += read->peso;
-										read->loc = tAreas[i2].front3;
+										strcpy(read->loc, tAreas[i2].front3);
 										temp->prox = read;
 										temp = temp->prox;
 										fclose(f);
@@ -119,11 +110,10 @@ Animais * readAnimais(Animais *tAnimais, Areas *tAreas, int nrAreas, bool compAc
 	return tAnimais;
 }
 
-Animais * importAnimaisFile(Animais *tAnimais, char *nfile, Areas *tAreas, int nrAreas){
+Animais * importAnimaisFile(Animais *tAnimais, Areas *tAreas, char *nfile, int nrAreas){
 	Animais *temp = tAnimais;
-	Areas *ta = tAreas;
-	int last_id = getLastAnimalID(tAnimais), loc, peso;
-	char nome[100], especie[100];
+	int last_id = getLastAnimalID(tAnimais), peso;
+	char nome[100], especie[100], loc[100];
 	FILE *f;
 	printf("A procurar ficheiro...\n");
 	f = fopen(nfile, "r");
@@ -134,12 +124,12 @@ Animais * importAnimaisFile(Animais *tAnimais, char *nfile, Areas *tAreas, int n
 	printf("Ficheiro aberto!\n");
 
 	while(!feof(f)){
-		if(fscanf(f,"%s\t%s\t%d\t%d", especie, nome, &peso, &loc) < 0){
+		if(fscanf(f,"%s\t%s\t%d\t%s", especie, nome, &peso, &loc) < 0){
 			break;
 		}
-		if((pesoActArea(ta,loc,nrAreas) + peso) <= capArea(ta, loc, nrAreas)){
+		if((pesoActArea(tAreas,loc,nrAreas) + peso) <= capArea(tAreas, loc, nrAreas)){
 			last_id++;
-			temp = addAnimaisEnd(temp, ta, last_id, especie, nome, peso, loc, -1, nrAreas);
+			temp = addAnimaisEnd(temp, tAreas, last_id, especie, nome, peso, loc, nrAreas);
 		}
 
 	}
@@ -155,7 +145,7 @@ void dispAnimais(Animais *tAnimais){
 	while(temp->prox != NULL){
 		temp = temp->prox;
 		if(temp->filho.strt && !temp->pais.strt){
-			printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   ", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+			printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%s)   ", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
 			temp2 = temp->filho.strt;
 			while (temp2 != NULL) {
 				printf("[FILHO](%s)   ", temp2->nome);
@@ -164,10 +154,10 @@ void dispAnimais(Animais *tAnimais){
 			printf("\n");
 		}
 		if(!temp->filho.strt && !temp->pais.strt){
-			printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO]()\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+			printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%s)   [FILHO]()\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
 		}
 		if (!temp->filho.strt && temp->pais.strt) {
-			printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   ", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+			printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%s)   ", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
 			temp2 = temp->pais.strt;
 			while (temp2 != NULL) {
 				printf("[PAIS](%s)   ", temp2->nome);
@@ -176,7 +166,7 @@ void dispAnimais(Animais *tAnimais){
 			printf("\n");
 		}
 		if (temp->filho.strt && temp->pais.strt) {
-			printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   ", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+			printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%s)   ", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
 			temp2 = temp->filho.strt;
 			while (temp2 != NULL) {
 				printf("[FILHO](%s)   ", temp2->nome);
@@ -192,19 +182,49 @@ void dispAnimais(Animais *tAnimais){
 	}
 }
 
-void dispAnimaisArea(Animais *tAnimais, Areas *tAreas, int id, int nrAreas){
+void dispAnimaisArea(Animais *tAnimais, char *id, int nrAreas){
 	Animais *temp = tAnimais;
+	Animais *temp2;
 	int i;
-	printf("\n[ANIMAIS NA AREA %d]\n", id);
+	printf("\n[ANIMAIS NA AREA %s]\n", id);
 	for(i=0;i<nrAreas;i++){
-		if(tAreas[i].id == id){
-			while(temp->prox != NULL){
-				temp = temp->prox;
-				if(temp->filho.strt){
-					printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO](%d-%s)\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc, temp->filho.strt->id, temp->filho.strt->nome);
+		while (temp->prox != NULL) {
+			temp = temp->prox;
+			if (strcmp(temp->loc, id) == 0) {
+				if (temp->filho.strt && !temp->pais.strt) {
+					printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%s)   ", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+					temp2 = temp->filho.strt;
+					while (temp2 != NULL) {
+						printf("[FILHO](%s)   ", temp2->nome);
+						temp2 = temp2->prox;
+					}
+					printf("\n");
 				}
-				if(!temp->filho.strt){
-					printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO]()\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+				if (!temp->filho.strt && !temp->pais.strt) {
+					printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%s)   [FILHO]()\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+				}
+				if (!temp->filho.strt && temp->pais.strt) {
+					printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%s)   ", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+					temp2 = temp->pais.strt;
+					while (temp2 != NULL) {
+						printf("[PAIS](%s)   ", temp2->nome);
+						temp2 = temp2->prox;
+					}
+					printf("\n");
+				}
+				if (temp->filho.strt && temp->pais.strt) {
+					printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%s)   ", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+					temp2 = temp->filho.strt;
+					while (temp2 != NULL) {
+						printf("[FILHO](%s)   ", temp2->nome);
+						temp2 = temp2->prox;
+					}
+					temp2 = temp->pais.strt;
+					while (temp2 != NULL) {
+						printf("[PAIS](%s)   ", temp2->nome);
+						temp2 = temp2->prox;
+					}
+					printf("\n");
 				}
 			}
 		}
@@ -213,15 +233,45 @@ void dispAnimaisArea(Animais *tAnimais, Areas *tAreas, int id, int nrAreas){
 
 void dispAnimaisEspecie(Animais *tAnimais, char *especie){
 	Animais *temp = tAnimais;
+	Animais *temp2;
 	printf("\n[ANIMAIS DA ESPECIE %s]\n", especie);
 	while(temp->prox != NULL){
 		temp = temp->prox;
 		if(strcmp(temp->especie,especie)==0){
-			if(temp->filho.strt){
-				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO](%d-%s)\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc, temp->filho.strt->id, temp->filho.strt->nome);
+			if (temp->filho.strt && !temp->pais.strt) {
+				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%s)   ", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+				temp2 = temp->filho.strt;
+				while (temp2 != NULL) {
+					printf("[FILHO](%s)   ", temp2->nome);
+					temp2 = temp2->prox;
+				}
+				printf("\n");
 			}
-			if(!temp->filho.strt){
-				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO]()\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+			if (!temp->filho.strt && !temp->pais.strt) {
+				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%s)   [FILHO]()\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+			}
+			if (!temp->filho.strt && temp->pais.strt) {
+				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%s)   ", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+				temp2 = temp->pais.strt;
+				while (temp2 != NULL) {
+					printf("[PAIS](%s)   ", temp2->nome);
+					temp2 = temp2->prox;
+				}
+				printf("\n");
+			}
+			if (temp->filho.strt && temp->pais.strt) {
+				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%s)   ", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+				temp2 = temp->filho.strt;
+				while (temp2 != NULL) {
+					printf("[FILHO](%s)   ", temp2->nome);
+					temp2 = temp2->prox;
+				}
+				temp2 = temp->pais.strt;
+				while (temp2 != NULL) {
+					printf("[PAIS](%s)   ", temp2->nome);
+					temp2 = temp2->prox;
+				}
+				printf("\n");
 			}
 		}
 	}
@@ -229,15 +279,45 @@ void dispAnimaisEspecie(Animais *tAnimais, char *especie){
 
 void dispAnimalID(Animais *tAnimais, int id){
 	Animais *temp = tAnimais;
+	Animais *temp2;
 	printf("\n[INFO ANIMAL ID: %d]\n", id);
 	while(temp->prox != NULL){
 		temp = temp->prox;
 		if(temp->id == id){
-			if(temp->filho.strt){
-				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO](%d-%s)\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc, temp->filho.strt->id, temp->filho.strt->nome);
+			if (temp->filho.strt && !temp->pais.strt) {
+				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%s)   ", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+				temp2 = temp->filho.strt;
+				while (temp2 != NULL) {
+					printf("[FILHO](%s)   ", temp2->nome);
+					temp2 = temp2->prox;
+				}
+				printf("\n");
 			}
-			if(!temp->filho.strt){
-				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO]()\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+			if (!temp->filho.strt && !temp->pais.strt) {
+				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%s)   [FILHO]()\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+			}
+			if (!temp->filho.strt && temp->pais.strt) {
+				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%s)   ", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+				temp2 = temp->pais.strt;
+				while (temp2 != NULL) {
+					printf("[PAIS](%s)   ", temp2->nome);
+					temp2 = temp2->prox;
+				}
+				printf("\n");
+			}
+			if (temp->filho.strt && temp->pais.strt) {
+				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%s)   ", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+				temp2 = temp->filho.strt;
+				while (temp2 != NULL) {
+					printf("[FILHO](%s)   ", temp2->nome);
+					temp2 = temp2->prox;
+				}
+				temp2 = temp->pais.strt;
+				while (temp2 != NULL) {
+					printf("[PAIS](%s)   ", temp2->nome);
+					temp2 = temp2->prox;
+				}
+				printf("\n");
 			}
 		}
 	}
@@ -245,15 +325,45 @@ void dispAnimalID(Animais *tAnimais, int id){
 
 void dispAnimalNome(Animais *tAnimais, char *nome){
 	Animais *temp = tAnimais;
+	Animais *temp2;
 	printf("\n[INFO ANIMAL NOME: %s]\n", nome);
 	while(temp->prox != NULL){
 		temp = temp->prox;
 		if(strcmp(temp->nome,nome)==0){
-			if(temp->filho.strt){
-				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO](%d-%s)\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc, temp->filho.strt->id, temp->filho.strt->nome);
+			if (temp->filho.strt && !temp->pais.strt) {
+				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%s)   ", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+				temp2 = temp->filho.strt;
+				while (temp2 != NULL) {
+					printf("[FILHO](%s)   ", temp2->nome);
+					temp2 = temp2->prox;
+				}
+				printf("\n");
 			}
-			if(!temp->filho.strt){
-				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%d)   [FILHO]()\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+			if (!temp->filho.strt && !temp->pais.strt) {
+				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%s)   [FILHO]()\n", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+			}
+			if (!temp->filho.strt && temp->pais.strt) {
+				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%s)   ", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+				temp2 = temp->pais.strt;
+				while (temp2 != NULL) {
+					printf("[PAIS](%s)   ", temp2->nome);
+					temp2 = temp2->prox;
+				}
+				printf("\n");
+			}
+			if (temp->filho.strt && temp->pais.strt) {
+				printf("[ID](%d)   [NOME](%s)   [ESPECIE](%s)   [PESO](%d)   [LOC](%s)   ", temp->id, temp->nome, temp->especie, temp->peso, temp->loc);
+				temp2 = temp->filho.strt;
+				while (temp2 != NULL) {
+					printf("[FILHO](%s)   ", temp2->nome);
+					temp2 = temp2->prox;
+				}
+				temp2 = temp->pais.strt;
+				while (temp2 != NULL) {
+					printf("[PAIS](%s)   ", temp2->nome);
+					temp2 = temp2->prox;
+				}
+				printf("\n");
 			}
 		}
 	}
@@ -268,7 +378,7 @@ void rmAnimalID(Animais *tAnimais, Areas *tAreas, int id, int nrAreas){
 		temp = temp->prox;
 		if(temp->id == id){
 			for(i=0;i<nrAreas;i++){
-				if(tAreas[i].id == temp->loc){
+				if(strcmp(tAreas[i].id, temp->loc)==0){
 					tAreas[i].pesoAct -= temp->peso;
 				}
 			}
@@ -286,7 +396,7 @@ void rmAnimalID(Animais *tAnimais, Areas *tAreas, int id, int nrAreas){
 		}
 		if(temp->prox->id == id){
 			for(i=0;i<nrAreas;i++){
-				if(tAreas[i].id == temp->prox->loc){
+				if(strcmp(tAreas[i].id, temp->prox->loc)==0){
 					tAreas[i].pesoAct -= temp->prox->peso;
 				}
 			}
@@ -316,7 +426,7 @@ void rmAnimalNome(Animais *tAnimais, Areas *tAreas, char *nome, int nrAreas){
 		temp = temp->prox;
 		if(strcmp(temp->nome,nome)==0){
 			for(i=0;i<nrAreas;i++){
-				if(tAreas[i].id == temp->loc){
+				if(strcmp(tAreas[i].id, temp->loc)==0){
 					tAreas[i].pesoAct -= temp->peso;
 				}
 			}
@@ -334,7 +444,7 @@ void rmAnimalNome(Animais *tAnimais, Areas *tAreas, char *nome, int nrAreas){
 		}
 		if(strcmp(temp->prox->nome,nome)==0){
 			for(i=0;i<nrAreas;i++){
-				if(tAreas[i].id == temp->prox->loc){
+				if(strcmp(tAreas[i].id, temp->prox->loc)==0){
 					tAreas[i].pesoAct -= temp->prox->peso;
 				}
 			}
@@ -355,7 +465,7 @@ void rmAnimalNome(Animais *tAnimais, Areas *tAreas, char *nome, int nrAreas){
 	return;
 }
 
-void transfAnimal(Animais *tAnimais, Areas *tAreas, int id, int desto, int nrAreas){
+void transfAnimal(Animais *tAnimais, Areas *tAreas, int id, char *desto, int nrAreas){
 	Animais *temp = tAnimais;
 	int i/*destino*/, i2/*actual*/;
 
@@ -363,15 +473,15 @@ void transfAnimal(Animais *tAnimais, Areas *tAreas, int id, int desto, int nrAre
 		temp = temp->prox;
 		if(temp->id == id){
 			for(i=0;i<nrAreas;i++){
-				if(tAreas[i].id == desto){//procura area com ID do destino
-					if(tAreas[i].front1 == temp->loc){ // verifica se a localizaçao actual faz fronteira com a area destino
+				if(strcmp(tAreas[i].id, desto)==0){//procura area com ID do destino
+					if(strcmp(tAreas[i].front1, temp->loc)==0){ // verifica se a localizaçao actual faz fronteira com a area destino
 						for(i2=0;i2<nrAreas;i2++){
 							if(tAreas[i2].id == tAreas[i].front1){//encontra a area actual do animal
 								if((tAreas[i].pesoAct + temp->peso) <= tAreas[i].cap){//verifica se o destino tem capacidade para ter o animal
 									tAreas[i2].pesoAct -= temp->peso;
 									tAreas[i].pesoAct += temp->peso;
-									temp->loc = tAreas[i].id;
-									printf("Animal transferido!! [%d/%d/%d]\n", temp->id, temp->loc, temp->loc);
+									strcpy(temp->loc, tAreas[i].id);
+									printf("Animal transferido!! [%d/%s/%s]\n", temp->id, temp->loc, temp->loc);
 									return;
 								}else{
 									printf("Area destino nao tem capacidade para receber o animal!!\n");
@@ -380,14 +490,14 @@ void transfAnimal(Animais *tAnimais, Areas *tAreas, int id, int desto, int nrAre
 							}
 						}
 					}
-					if(tAreas[i].front2 == temp->loc){// verifica se a localizaçao actual faz fronteira com a area destino
+					if(strcmp(tAreas[i].front2, temp->loc)==0){// verifica se a localizaçao actual faz fronteira com a area destino
 						for(i2=0;i2<nrAreas;i2++){
-							if(tAreas[i2].id == tAreas[i].front2){//encontra a area actual do animal
+							if(strcmp(tAreas[i2].id, tAreas[i].front2)==0){//encontra a area actual do animal
 								if((tAreas[i].pesoAct + temp->peso) <= tAreas[i].cap){//verifica se o destino tem capacidade para ter o animal
 									tAreas[i2].pesoAct -= temp->peso;
 									tAreas[i].pesoAct += temp->peso;
-									temp->loc = tAreas[i].id;
-									printf("Animal transferido!! [%d/%d/%d]\n", temp->id, temp->loc, temp->loc);
+									strcpy(temp->loc, tAreas[i].id);
+									printf("Animal transferido!! [%d/%s/%s]\n", temp->id, temp->loc, temp->loc);
 									return;
 								}else{
 									printf("Area destino nao tem capacidade para receber o animal!!\n");
@@ -396,14 +506,14 @@ void transfAnimal(Animais *tAnimais, Areas *tAreas, int id, int desto, int nrAre
 							}
 						}
 					}
-					if(tAreas[i].front3 == temp->loc){// verifica se a localizaçao actual faz fronteira com a area destino
+					if(strcmp(tAreas[i].front3, temp->loc)==0){// verifica se a localizaçao actual faz fronteira com a area destino
 						for(i2=0;i2<nrAreas;i2++){
-							if(tAreas[i2].id == tAreas[i].front3){//encontra a area actual do animal
+							if(strcmp(tAreas[i2].id, tAreas[i].front3)==0){//encontra a area actual do animal
 								if((tAreas[i].pesoAct + temp->peso) <= tAreas[i].cap){//verifica se o destino tem capacidade para ter o animal
 									tAreas[i2].pesoAct -= temp->peso;
 									tAreas[i].pesoAct += temp->peso;
-									temp->loc = tAreas[i].id;
-									printf("Animal transferido!! [%d/%d/%d]\n", temp->id, temp->loc, temp->loc);
+									strcpy(temp->loc, tAreas[i].id);
+									printf("Animal transferido!! [%d/%s/%s]\n", temp->id, temp->loc, temp->loc);
 									return;
 								}else{
 									printf("Area destino nao tem capacidade para receber o animal!!\n");
@@ -435,6 +545,7 @@ void saveAnimais(Animais *tAnimais){
 	printf("A guardar Animais para ficheiro...\n");
 	while(temp->prox != NULL){
 		temp = temp->prox;
+		temp->filho.strt = NULL;
 		fwrite(temp, sizeof(Animais), 1, f);
 	}
 	fclose(f);
@@ -455,16 +566,109 @@ int getLastAnimalID(Animais *tAnimais){
 }
 
 void linkAnimais(Animais *tAnimais){
-	Animais *ani = tAnimais;
-	Animais *anit;
+	Animais *ani = tAnimais; //animal principal
+	Animais *anit;//animal que é pai do ani
+	Animais *ftemp; //filho do animal anit
+	Animais *ptemp; //pai do animal ani
+	Animais *temp; //temp geral, pode ser muita coisa
 
 	while(ani->prox != NULL){
 		ani = ani->prox;
-		anit = tAnimais;
-		while(anit->prox != NULL){
-			anit = anit->prox;
-			if(anit->id == ani->filho.fID){
-				ani->filho.strt = anit;
+		if (ani->pais.fnr == 1) {//caso o animal tenha 1 pai
+			anit = tAnimais;
+			while (anit->prox != NULL) {
+				anit = anit->prox;
+				if (anit->id == ani->pais.fID) {
+					ptemp = anit;
+					ftemp = ani;
+					break;
+				}
+			}
+			ani->pais.strt = malloc(sizeof(Animais));
+			memcpy(ani->pais.strt, ptemp, sizeof(Animais));
+			ani->pais.strt->prox = NULL;
+			ani->pais.strt->filho.strt = ani;
+
+			if (anit->filho.strt) {
+				temp = anit->filho.strt;
+				while (temp->prox != NULL) {
+					temp = temp->prox;
+				}
+				temp->prox = malloc(sizeof(Animais));
+				memcpy(temp->prox, ftemp, sizeof(Animais));
+				temp->prox->prox = NULL;
+				temp->prox->pais.strt = anit;
+			}
+			else {
+				anit->filho.strt = malloc(sizeof(Animais));
+				memcpy(anit->filho.strt, ftemp, sizeof(Animais));
+				anit->filho.strt->prox = NULL;
+				anit->filho.strt->pais.strt = anit;
+			}
+		}
+		if (ani->pais.fnr == 2) {//caso o animal tenha 2 pais
+			//pai 1
+			anit = tAnimais;
+			while (anit->prox != NULL) {
+				anit = anit->prox;
+				if (anit->id == ani->pais.fID) {
+					ptemp = anit;
+					ftemp = ani;
+					break;
+				}
+			}
+			ani->pais.strt = malloc(sizeof(Animais));
+			memcpy(ani->pais.strt, ptemp, sizeof(Animais));
+			ani->pais.strt->prox = NULL;
+			ani->pais.strt->filho.strt = ani;
+
+			if (anit->filho.strt) {
+				temp = anit->filho.strt;
+				while (temp->prox != NULL) {
+					temp = temp->prox;
+				}
+				temp->prox = malloc(sizeof(Animais));
+				memcpy(temp->prox, ftemp, sizeof(Animais));
+				temp->prox->prox = NULL;
+				temp->prox->pais.strt = anit;
+			}
+			else {
+				anit->filho.strt = malloc(sizeof(Animais));
+				memcpy(anit->filho.strt, ftemp, sizeof(Animais));
+				anit->filho.strt->prox = NULL;
+				anit->filho.strt->pais.strt = anit;
+			}
+
+			//pai 2
+			anit = tAnimais;
+			while (anit->prox != NULL) {
+				anit = anit->prox;
+				if (anit->id == ani->pais.fID2) {
+					ptemp = anit;
+					ftemp = ani;
+					break;
+				}
+			}
+			ani->pais.strt->prox = malloc(sizeof(Animais));
+			memcpy(ani->pais.strt->prox, ptemp, sizeof(Animais));
+			ani->pais.strt->prox->prox = NULL;
+			ani->pais.strt->prox->filho.strt = ani;
+
+			if (anit->filho.strt) {
+				temp = anit->filho.strt;
+				while (temp->prox != NULL) {
+					temp = temp->prox;
+				}
+				temp->prox = malloc(sizeof(Animais));
+				memcpy(temp->prox, ftemp, sizeof(Animais));
+				temp->prox->prox = NULL;
+				temp->prox->pais.strt = anit;
+			}
+			else {
+				anit->filho.strt = malloc(sizeof(Animais));
+				memcpy(anit->filho.strt, ftemp, sizeof(Animais));
+				anit->filho.strt->prox = NULL;
+				anit->filho.strt->pais.strt = anit;
 			}
 		}
 	}
@@ -475,18 +679,17 @@ void criaFilho1(Animais *tAnimais, Areas *tAreas, int id, char *nome, int nrArea
 	Animais *temp = tAnimais;
 	Animais *anew;
 	Animais *ftemp;
-	Animais *ptemp;
 
 	while(temp->prox != NULL){
 		temp = temp->prox;
 		if(temp->id == id){
 			for (i = 0; i<nrAreas; i++) {//obter area
-				if (tAreas[i].id == temp->loc) break;
+				if (strcmp(tAreas[i].id, temp->loc)==0) break;
 			}
 			tpeso = temp->peso * 0.20;
 			temp->peso -= tpeso;
 			tAreas[i].pesoAct -= tpeso;
-			anew = addAnimaisEnd(tAnimais, tAreas, getLastAnimalID(tAnimais)+1,temp->especie,nome,tpeso,temp->loc,-1, nrAreas);
+			anew = addAnimaisEnd(tAnimais, tAreas, getLastAnimalID(tAnimais)+1,temp->especie,nome,tpeso,temp->loc, nrAreas);
 			while (anew->prox != NULL) {
 				anew = anew->prox;
 			}
@@ -495,17 +698,17 @@ void criaFilho1(Animais *tAnimais, Areas *tAreas, int id, char *nome, int nrArea
 				while(ftemp->prox != NULL){
 					ftemp = ftemp->prox;
 				}
-				ftemp = malloc(sizeof(Animais));
-				memcpy(ftemp, anew, sizeof(Animais));//cria uma copia independente do bloco do filho no bloco do pai
-				ftemp->prox = NULL;
-				ptemp = temp;
-				ftemp->pais.strt = malloc(sizeof(Animais));
-				memcpy(ftemp->pais.strt, temp, sizeof(Animais));//cria uma copia independente do bloco do pai no bloco independente do filho
-				temp->filho.strt->pais.strt->prox = NULL;
-				temp = temp->prox;
-				temp->pais.strt = malloc(sizeof(Animais));
-				memcpy(temp->pais.strt, ptemp, sizeof(Animais));//cria uma copia independente do bloco do pai no bloco do filho
-				temp->pais.strt->prox = NULL;
+				ftemp->prox = malloc(sizeof(Animais));
+				memcpy(ftemp->prox, anew, sizeof(Animais));//cria uma copia independente do bloco do filho no bloco do pai
+				ftemp->prox->prox = NULL;
+				ftemp->prox->pais.strt = malloc(sizeof(Animais));
+				memcpy(ftemp->prox->pais.strt, temp, sizeof(Animais));//cria uma copia independente do bloco do pai no bloco independente do filho
+				ftemp->prox->pais.strt->prox = NULL;
+				anew->pais.strt = malloc(sizeof(Animais));
+				memcpy(anew->pais.strt, temp, sizeof(Animais));//cria uma copia independente do bloco do pai no bloco do filho
+				anew->pais.strt->prox = NULL;
+				anew->pais.fnr = 1;
+				anew->pais.fID = temp->id;
 				return;
 
 			} else {
@@ -513,21 +716,21 @@ void criaFilho1(Animais *tAnimais, Areas *tAreas, int id, char *nome, int nrArea
 				temp->filho.strt = malloc(sizeof(Animais));
 				memcpy(temp->filho.strt, anew, sizeof(Animais));//cria uma copia independente do bloco do filho no bloco do pai
 				temp->filho.strt->prox = NULL;
-				ptemp = temp;
 				temp->filho.strt->pais.strt = malloc(sizeof(Animais));
 				memcpy(temp->filho.strt->pais.strt, temp, sizeof(Animais));//cria uma copia independente do bloco do pai no bloco independente do filho
 				temp->filho.strt->pais.strt->prox = NULL;
-				temp = temp->prox;
-				temp->pais.strt = malloc(sizeof(Animais));
-				memcpy(temp->pais.strt, ptemp, sizeof(Animais));//cria uma copia independente do bloco do pai no bloco do filho
-				temp->pais.strt->prox = NULL;
+				anew->pais.strt = malloc(sizeof(Animais));
+				memcpy(anew->pais.strt, temp, sizeof(Animais));//cria uma copia independente do bloco do pai no bloco do filho
+				anew->pais.strt->prox = NULL;
+				anew->pais.fnr = 1;
+				anew->pais.fID = temp->id;
 				return;
 			}
 		}
 	}
 }
 
-bool verifyFilho2(Animais *tAnimais,int id1, int id2){
+bool verifyFilho2(Animais *tAnimais, int id1, int id2){
 	Animais *temp = tAnimais;
 	Animais *anew;
 
@@ -543,7 +746,7 @@ bool verifyFilho2(Animais *tAnimais,int id1, int id2){
 			while (anew->prox != NULL) {
 				anew = anew->prox;
 				if(anew->id == id2){
-					if(temp->loc == anew->loc){
+					if(strcmp(temp->loc, anew->loc)==0){
 						if(strcmp(temp->especie,anew->especie) == 0){
 							return true;
 						}else{
@@ -562,62 +765,91 @@ bool verifyFilho2(Animais *tAnimais,int id1, int id2){
 }
 
 void criaFilho2(Animais *tAnimais, Areas *tAreas, int id1, int id2, char *nome, int nrAreas){
-	int tpeso=0, i;
+	int tpeso = 0, i;
 	Animais *temp = tAnimais;
 	Animais *temp2 = tAnimais;
 	Animais *anew;
 	Animais *ftemp;
-	Animais *ptemp;
 
-	for(i=0;i<nrAreas;i++){
-		if(tAreas[i].id == id1) break;
-	}
-
-	while(temp->prox != NULL){
+	while (temp->prox != NULL) {
 		temp = temp->prox;
-		if(temp->id == id1){
-			while(temp2->prox != NULL){
+		if (temp->id == id1) {//animal 1
+			while (temp2->prox != NULL) {
 				temp2 = temp2->prox;
-				if(temp2->id == id2){
+				if (temp2->id == id2) {//animal 2
+					for (i = 0; i<nrAreas; i++) {//obter area
+						if (strcmp(tAreas[i].id, temp->loc) == 0) break;
+					}
 					tpeso = temp->peso * 0.20; //animal 1
 					temp->peso -= temp->peso * 0.20; //animal 1
 					tpeso += temp2->peso * 0.20; //animal 2
 					temp2->peso -= temp2->peso * 0.20; //animal 2
 					tAreas[i].pesoAct -= tpeso; //peso area on estao
-					anew = addAnimaisEnd(tAnimais, tAreas, getLastAnimalID(tAnimais)+1,temp->especie,nome,tpeso,temp->loc,-1, nrAreas);
-					while (anew->prox != NULL) {
+					anew = addAnimaisEnd(tAnimais, tAreas, getLastAnimalID(tAnimais) + 1, temp->especie, nome, tpeso, temp->loc, nrAreas);
+					while (anew->prox != NULL) {//vai buscar o novo animal
 						anew = anew->prox;
 					}
+
 					//animal 1
-					if (temp->filho.strt) {
+					if (temp->filho.strt) {//caso ja tenha um filho
 						ftemp = temp->filho.strt;
 						while (ftemp->prox != NULL) {
 							ftemp = ftemp->prox;
 						}
-						ftemp = anew;
-						ftemp->prox = NULL;
-					} else {
-						temp->filho.fID = anew->id;
-						temp->filho.strt = anew;
-						temp->filho.strt->prox = NULL;
+						ftemp->prox = malloc(sizeof(Animais));
+						memcpy(ftemp->prox, anew, sizeof(Animais));//cria uma copia independente do bloco do filho no bloco do pai
+						ftemp->prox->prox = NULL;
+						ftemp->prox->pais.strt = malloc(sizeof(Animais));
+						memcpy(ftemp->prox->pais.strt, temp, sizeof(Animais));//cria uma copia independente do bloco do pai no bloco independente do filho
+						ftemp->prox->pais.strt->prox = NULL;
 					}
+					else {
+						temp->filho.fID = anew->id;
+						temp->filho.strt = malloc(sizeof(Animais));
+						memcpy(temp->filho.strt, anew, sizeof(Animais));//cria uma copia independente do bloco do filho no bloco do pai
+						temp->filho.strt->prox = NULL;
+						temp->filho.strt->pais.strt = malloc(sizeof(Animais));
+						memcpy(temp->filho.strt->pais.strt, temp, sizeof(Animais));//cria uma copia independente do bloco do pai no bloco independente do filho
+						temp->filho.strt->pais.strt->prox = NULL;
+					}
+
 					//animal 2
-					if (temp2->filho.strt) {
+					if (temp2->filho.strt) {//caso ja tenha um filho
 						ftemp = temp2->filho.strt;
 						while (ftemp->prox != NULL) {
 							ftemp = ftemp->prox;
 						}
-						ftemp = anew;
-						ftemp->prox = NULL;
-					} else {
+						ftemp->prox = malloc(sizeof(Animais));
+						memcpy(ftemp->prox, anew, sizeof(Animais));//cria uma copia independente do bloco do filho no bloco do pai
+						ftemp->prox->prox = NULL;
+						ftemp->prox->pais.strt = malloc(sizeof(Animais));
+						memcpy(ftemp->prox->pais.strt, temp2, sizeof(Animais));//cria uma copia independente do bloco do pai no bloco independente do filho
+						ftemp->prox->pais.strt->prox = NULL;
+					}
+					else {
 						temp2->filho.fID = anew->id;
-						temp2->filho.strt = anew;
+						temp2->filho.strt = malloc(sizeof(Animais));
+						memcpy(temp2->filho.strt, anew, sizeof(Animais));//cria uma copia independente do bloco do filho no bloco do pai
 						temp2->filho.strt->prox = NULL;
+						temp2->filho.strt->pais.strt = malloc(sizeof(Animais));
+						memcpy(temp2->filho.strt->pais.strt, temp2, sizeof(Animais));//cria uma copia independente do bloco do pai no bloco independente do filho
+						temp2->filho.strt->pais.strt->prox = NULL;
 					}
 
-					temp->filho.strt->pais.strt = temp;
-					temp->filho.strt->pais.strt->prox = temp2;
-					temp->filho.strt->pais.strt->prox->prox = NULL;
+					//pais
+					//animal1
+					anew->pais.strt = malloc(sizeof(Animais));
+					memcpy(anew->pais.strt, temp, sizeof(Animais));//cria uma copia independente do bloco do pai no bloco do filho
+					anew->pais.strt->prox = NULL;
+					anew->pais.fnr = 1;
+					anew->pais.fID = temp->id;
+					//animal 2
+					anew->pais.strt->prox = malloc(sizeof(Animais));
+					memcpy(anew->pais.strt->prox, temp2, sizeof(Animais));//cria uma copia independente do bloco do pai no bloco do filho
+					anew->pais.strt->prox->prox = NULL;
+					anew->pais.fnr = 2;
+					anew->pais.fID2 = temp2->id;
+					return;
 				}
 			}
 		}

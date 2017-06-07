@@ -12,8 +12,8 @@
 #include "funcoes.h"
 
 int main(void) {
-	int menuopt, last_area_id=0, nrAreas, last_animal_id, tType=-1, tCap, tNR=0, t1=-1, t2=-2, t3=-3, valid1=0, valid2=0, valid3=0, id=0;
-	char ch;
+	int menuopt, nrAreas, last_animal_id, tType=-1, tCap, tNR=0, valid1=0, valid2=0, valid3=0, id=0;
+	char ch, t1[100], t2[100], t3[100], arID[100];
 	bool compActive = false;
 	Areas *zAreas = malloc(sizeof(Areas));
 	Animais *zAnimais = NULL;
@@ -22,10 +22,9 @@ int main(void) {
 
 	dispIntro();
 	printf("\n");
-	compActive = checkComp();
+	//compActive = checkComp();
 	if (compActive) printf("Incompatibilidade entre animais LIGADA!\n");
 	zAreas = readAreas(zAreas,&nrAreas);
-	last_area_id = getLastAreaID(zAreas, nrAreas);
 	zAnimais = readAnimais(zAnimais, zAreas, nrAreas, compActive);
 	linkAnimais(zAnimais);
 	last_animal_id = getLastAnimalID(zAnimais);
@@ -35,13 +34,16 @@ int main(void) {
 	for(;;){
 		dispArea(zAreas, nrAreas);
 		dispAnimais(zAnimais);
-		last_area_id = getLastAreaID(zAreas, nrAreas);
+		//printf("nrAreas: %d\n", nrAreas);
 		last_animal_id = getLastAnimalID(zAnimais);
 		menuopt = menu();
 		if(menuopt == 0) break;
-		if(menuopt == 11){//adiciontAreas[id-1].ar area
-			last_area_id++;
-			tType=tNR=t1=t2=t3=-1; //reset vars
+		if(menuopt == 11){//adicionar area
+			tType=tNR=-1; //reset vars
+			do {
+				printf("ID da area a adicionar: ");
+				scanf("%s", &arID);
+			} while (areaExiste(zAreas, arID, nrAreas));
 			while(tType != 0 && tType != 1){
 				while (((ch = getchar()) != EOF) && (ch != '\n')) putchar(ch); // limpa o buffer stdin para usar o fgets
 				printf("Tipo de area (0 = jaula, 1 = espaco vedado): ");
@@ -57,10 +59,10 @@ int main(void) {
 			}
 			if(tNR == 1){
 				while(valid1 != 1){
-					while(t1 >= last_area_id || t1 < 1){
+					do{
 						printf("ID fronteira 1: ");
-						scanf("%d", &t1);
-					}
+						scanf("%s", &t1);
+					} while (!areaExiste(zAreas,t1,nrAreas));
 					if(nrFront(zAreas, t1, nrAreas) >= 3){
 						printf("Area selecionada ja tem o maximo de 3 fronteiras!\n");
 					}else{
@@ -68,15 +70,15 @@ int main(void) {
 					}
 				}
 				nrAreas++;
-				zAreas = addAreaEnd(zAreas, last_area_id, tType, tCap, tNR, t1, -1, -1, nrAreas);
-				zAreas = addFronteira(zAreas, t1, last_area_id, nrAreas);
+				zAreas = addAreaEnd(zAreas, arID, tType, tCap, tNR, t1, "", "", nrAreas);
+				zAreas = addFronteira(zAreas, t1, arID, nrAreas);
 				valid1=0;
 			}else if(tNR == 2){
 				while (valid1 != 1) {
-					while(t1 >= last_area_id || t1 < 1){
+					do {
 						printf("ID fronteira 1: ");
-						scanf("%d", &t1);
-					}
+						scanf("%s", &t1);
+					} while (!areaExiste(zAreas, t1, nrAreas));
 					if(nrFront(zAreas, t1, nrAreas) >= 3){
 						printf("Area selecionada ja tem o maximo de 3 fronteiras!\n");
 					}else{
@@ -84,10 +86,10 @@ int main(void) {
 					}
 				}
 				while (valid2 != 1) {
-					while(t2 >= last_area_id || t2 < 1 || t2 == t1){
+					do {
 						printf("ID fronteira 2: ");
-						scanf("%d", &t2);
-					}
+						scanf("%s", &t2);
+					} while ((strcmp(t1,t2)!=0) && !areaExiste(zAreas, t2, nrAreas));
 					if(nrFront(zAreas, t2, nrAreas) >= 3){
 						printf("Area selecionada ja tem o maximo de 3 fronteiras!\n");
 					}else{
@@ -95,17 +97,17 @@ int main(void) {
 					}
 				}
 				nrAreas++;
-				zAreas = addAreaEnd(zAreas, last_area_id, tType, tCap, tNR, t1, t2, -1, nrAreas);
-				zAreas = addFronteira(zAreas, t1, last_area_id, nrAreas);
-				zAreas = addFronteira(zAreas, t2, last_area_id, nrAreas);
+				zAreas = addAreaEnd(zAreas, arID, tType, tCap, tNR, t1, t2, "", nrAreas);
+				zAreas = addFronteira(zAreas, t1, arID, nrAreas);
+				zAreas = addFronteira(zAreas, t2, arID, nrAreas);
 				valid1=0;
 				valid2=0;
 			}else if(tNR == 3){
 				while (valid1 != 1) {
-					while(t1 >= last_area_id || t1 < 1){
+					do {
 						printf("ID fronteira 1: ");
-						scanf("%d", &t1);
-					}
+						scanf("%s", &t1);
+					} while (!areaExiste(zAreas, t1, nrAreas));
 					if(nrFront(zAreas, t1, nrAreas) >= 3){
 						printf("Area selecionada ja tem o maximo de 3 fronteiras!\n");
 					}else{
@@ -113,10 +115,10 @@ int main(void) {
 					}
 				}
 				while (valid2 != 1) {
-					while(t2 >= last_area_id || t2 < 1 || t2 == t1){
+					do {
 						printf("ID fronteira 2: ");
-						scanf("%d", &t2);
-					}
+						scanf("%s", &t2);
+					} while ((strcmp(t1, t2) != 0) && !areaExiste(zAreas, t2, nrAreas));
 					if(nrFront(zAreas, t2, nrAreas) >= 3){
 						printf("Area selecionada ja tem o maximo de 3 fronteiras!\n");
 					}else{
@@ -124,10 +126,10 @@ int main(void) {
 					}
 				}
 				while (valid3 != 1) {
-					while(t3 >= last_area_id || t3 < 1 || (t3 == t1 && t3 == t2)){
-						printf("ID fronteira 2: ");
-						scanf("%d", &t3);
-					}
+					do {
+						printf("ID fronteira 3: ");
+						scanf("%s", &t3);
+					} while ((strcmp(t1, t3) != 0) && (strcmp(t2, t3) != 0) && !areaExiste(zAreas, t2, nrAreas));
 					if(nrFront(zAreas, t3, nrAreas) >= 3){
 						printf("Area selecionada ja tem o maximo de 3 fronteiras!\n");
 					}else{
@@ -135,10 +137,10 @@ int main(void) {
 					}
 				}
 				nrAreas++;
-				zAreas = addAreaEnd(zAreas, last_area_id, tType, tCap, tNR, t1, t2, t3, nrAreas);
-				zAreas = addFronteira(zAreas, t1, last_area_id, nrAreas);
-				zAreas = addFronteira(zAreas, t2, last_area_id, nrAreas);
-				zAreas = addFronteira(zAreas, t3, last_area_id, nrAreas);
+				zAreas = addAreaEnd(zAreas, arID, tType, tCap, tNR, t1, t2, t3, nrAreas);
+				zAreas = addFronteira(zAreas, t1, arID, nrAreas);
+				zAreas = addFronteira(zAreas, t2, arID, nrAreas);
+				zAreas = addFronteira(zAreas, t3, arID, nrAreas);
 				valid1=0;
 				valid2=0;
 				valid3=0;
@@ -149,17 +151,16 @@ int main(void) {
 			valid1=0;
 			do{
 				printf("ID da area a remover: ");
-				scanf("%d", &id);
-				if(pesoActArea(zAreas, id, nrAreas)!=0){
+				scanf("%s", &arID);
+				if(pesoActArea(zAreas, arID, nrAreas)!=0){
 					printf("Area selecionada ainda tem animais!\n");
 					valid1=0;
 				}else{
 					valid1=1;
 				}
 			}while (valid1!=1);
-			zAreas = rmArea(zAreas, id, nrAreas);
-			zAreas = rmFronteira(zAreas, id, nrAreas);
-			last_area_id = getLastAreaID(zAreas, nrAreas);
+			zAreas = rmArea(zAreas, arID, nrAreas);
+			zAreas = rmFronteira(zAreas, arID, nrAreas);
 		}
 		if(menuopt == 13) dispArea(zAreas, nrAreas);
 		if(menuopt == 211){//adicionar animal via ficheiro
@@ -170,11 +171,11 @@ int main(void) {
 			char nfile[100];
 			fgets(nfile, sizeof(nfile), stdin);
 			strtok(nfile, "\n");
-			zAnimais = importAnimaisFile(zAnimais, nfile, zAreas, nrAreas);
+			zAnimais = importAnimaisFile(zAnimais, zAreas, nfile, nrAreas);
 		}
 		if(menuopt == 212){//adicionar animal via terminal
-			int aPeso, aLoc;
-			char anome[100], aespecie[100];
+			int aPeso;
+			char anome[100], aespecie[100], aLoc[100];
 			while (((ch = getchar()) != EOF) && (ch != '\n')) putchar(ch); // limpa o buffer stdin para usar o fgets
 			printf("\nNome do animal: ");
 			fgets(anome, sizeof(anome), stdin);
@@ -185,8 +186,8 @@ int main(void) {
 			printf("Peso do animal: ");
 			scanf("%d", &aPeso);
 			printf("Localizacao do animal: ");
-			scanf("%d", &aLoc);
-			zAnimais = addAnimaisEnd(zAnimais,zAreas,last_animal_id+1,aespecie,anome,aPeso,aLoc,-1,nrAreas);
+			scanf("%s", &aLoc);
+			zAnimais = addAnimaisEnd(zAnimais,zAreas,last_animal_id+1,aespecie,anome,aPeso,aLoc,nrAreas);
 			printf("Animal adicionado!\n\n");
 		}
 		if(menuopt == 221){//remover animal por id
@@ -207,10 +208,10 @@ int main(void) {
 		}
 		if(menuopt == 232){//Lista dodos os animais na area X
 			while (((ch = getchar()) != EOF) && (ch != '\n')) putchar(ch); // limpa o buffer stdin para usar o fgets
-			int aID;
+			char aID[100];
 			printf("\nID da area a procurar: ");
-			scanf("%d", &aID);
-			dispAnimaisArea(zAnimais, zAreas, aID, nrAreas);
+			scanf("%s", &aID);
+			dispAnimaisArea(zAnimais, aID, nrAreas);
 		}
 		if(menuopt == 233){//Lista dodos os animais da especia X
 			while (((ch = getchar()) != EOF) && (ch != '\n')) putchar(ch); // limpa o buffer stdin para usar o fgets
@@ -236,12 +237,13 @@ int main(void) {
 			dispAnimalNome(zAnimais, nome);
 		}
 		if(menuopt == 25){//transferir animal por ID
-			int aID, destID;
+			int aID; 
+			char destID[100];
 			while (((ch = getchar()) != EOF) && (ch != '\n')) putchar(ch); // limpa o buffer stdin para usar o fgets
 			printf("ID do animal a transferir: ");
 			scanf("%d", &aID);
 			printf("ID da area destino: ");
-			scanf("%d", &destID);
+			scanf("%s", &destID);
 			transfAnimal(zAnimais, zAreas, aID, destID, nrAreas);
 		}
 		if(menuopt == 261){//Criar Filho a partir de 1 animal

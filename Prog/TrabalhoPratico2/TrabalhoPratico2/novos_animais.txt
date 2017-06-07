@@ -1,2 +1,2 @@
-baleia	alface	500	2
-passaro	piu	2	6
+baleia	alface	500	A2
+passaro	piu	2	A6

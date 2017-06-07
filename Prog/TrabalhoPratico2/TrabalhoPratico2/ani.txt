@@ -1,2 +1,2 @@
-cao	cao	10	1
-cao	cadela	8	1
+cao	cao	10	A1
+cao	cadela	8	A1

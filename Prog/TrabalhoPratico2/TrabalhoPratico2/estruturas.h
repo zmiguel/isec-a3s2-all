@@ -6,15 +6,15 @@ struct fam{
 };
 
 typedef struct area_st{
-  int id;
+  char id[100];
   int tipo; // 0 = jaula, 1 = espaço vedado
   int cap;
   int pesoAct;
   //fronteiras
   int nr_front;
-  int front1;
-  int front2;
-  int front3;
+  char front1[100];
+  char front2[100];
+  char front3[100];
 }Areas;
 
 typedef struct animais_st{
@@ -22,7 +22,7 @@ typedef struct animais_st{
   char especie[100];
   char nome[100];
   int peso;
-  int loc;
+  char loc[100];
   //familia
   struct fam filho;
   struct fam pais;
