@@ -1,3 +1,8 @@
+/*
+José Miguel Dias Valdeviesso Alves
+a21240042@alunos.isec.pt
+P11 - Programação
+*/
 Animais * addAnimaisEnd(Animais *tAnimais, Areas *tAreas, int id, char *especie, char *nome, int peso, char *locID, int nrAreas);
 Animais * importAnimaisFile(Animais *tAnimais, Areas *tAreas, char *nfile, int nrAreas);
 Animais * readAnimais(Animais *tAnimais, Areas *tAreas, int nrAreas, bool compActive);

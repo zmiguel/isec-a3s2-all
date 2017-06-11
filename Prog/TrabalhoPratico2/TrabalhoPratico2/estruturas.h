@@ -1,11 +1,16 @@
-struct fam{
-	int fnr;
-	int fID;
-	int fID2;
-	struct animais_st *strt;
+/*
+José Miguel Dias Valdeviesso Alves
+a21240042@alunos.isec.pt
+P11 - Programação
+*/
+struct fam {
+  int fnr;
+  int fID;
+  int fID2;
+  struct animais_st *strt;
 };
 
-typedef struct area_st{
+typedef struct area_st {
   char id[100];
   int tipo; // 0 = jaula, 1 = espaço vedado
   int cap;
@@ -17,7 +22,7 @@ typedef struct area_st{
   char front3[100];
 }Areas;
 
-typedef struct animais_st{
+typedef struct animais_st {
   int id;
   char especie[100];
   char nome[100];
